@@ -1,6 +1,6 @@
-# mastermind
+# quizmaster
 
-mastermind is an example Python script that demonstrates how quiz apps can be automatically solved using [ADB](https://developer.android.com/studio/command-line/adb), [OpenCV](https://opencv.org/) and OpenAI's [ChatGPT API](https://openai.com/blog/gpt-3-apps). In this example, I'm using it for solving the game [Quiz Planet](https://play.google.com/store/apps/details?id=com.lotum.quizplanet&hl=en&gl=US) but other ones should work too.
+quizmaster is an example Python script that demonstrates how quiz apps can be automatically solved using [ADB](https://developer.android.com/studio/command-line/adb), [OpenCV](https://opencv.org/) and OpenAI's [ChatGPT API](https://openai.com/blog/gpt-3-apps). In this example, I'm using it for solving the game [Quiz Planet](https://play.google.com/store/apps/details?id=com.lotum.quizplanet&hl=en&gl=US) but other ones should work too.
 
 Note that since ChatGPT isn't perfect, the answers are not always correct.
 
@@ -58,7 +58,7 @@ COORD_ANSW_A="300-1600"
 COORD_ANSW_D="800-1900"
 ```
 
-TIP: You can find them easily enabling [Pointer Location](https://developer.android.com/studio/debug/dev-options#input) in your phone's developer options.
+TIP: You can find them easily by enabling [Pointer Location](https://developer.android.com/studio/debug/dev-options#input) in your phone's developer options.
 
 <img src="./examples/screen.jpg" height="600">
 
