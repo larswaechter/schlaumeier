@@ -1,12 +1,12 @@
-# quizmaster
+# schlaumeier
 
-quizmaster is an example Python script that demonstrates how quiz apps can be automatically solved using [ADB](https://developer.android.com/studio/command-line/adb), [OpenCV](https://opencv.org/) and OpenAI's [ChatGPT API](https://openai.com/blog/gpt-3-apps). In this example, I'm using it for solving the game [Quiz Planet](https://play.google.com/store/apps/details?id=com.lotum.quizplanet&hl=en&gl=US) but other ones should work too.
+_schlaumeier_ is a Python script that allows you to automatically solve smartphone quiz apps like [Quiz Planet](https://play.google.com/store/apps/details?id=com.lotum.quizplanet&hl=en&gl=US) or [QuizDuel!](https://play.google.com/store/apps/details?id=se.maginteractive.quizduel2&hl=en&gl=US) using [ADB](https://developer.android.com/studio/command-line/adb), [OpenCV](https://opencv.org/) and OpenAI's [ChatGPT API](https://openai.com/blog/gpt-3-apps). In this example, I'm using it for solving questions from the game Quiz Planet but other ones should work as well with some adjustments.
 
-Note that since ChatGPT isn't perfect, the answers are not always correct.
+Note that since ChatGPT isn't perfect, the answers given are not always correct too. For predicting the answer to a question, OpenAI's [`gpt-3.5-turbo`](https://platform.openai.com/docs/models/gpt-3-5) model is used.
 
-## How it works
+## 💡 How it works
 
-The script is actually quite simple:
+The idea is actually quite simple:
 
 1. Take a screenshot of the app using ADB
 2. Slice the screenshot in 5 areas
@@ -29,7 +29,7 @@ ChatGPT's answer:
 B: Paris
 ```
 
-## Requirements
+## 📝 Requirements
 
 - Android Smartphone
   - [USB-Debugging](https://developer.android.com/studio/debug/dev-options#Enable-debugging) enabled
@@ -37,7 +37,7 @@ B: Paris
 - [ChatGPT API Key](https://devopsforu.com/how-to-connect-to-chat-gpt-api/)
 - [Tesseract](https://github.com/tesseract-ocr/tesseract)
 
-## Setup
+## 🖥️ Setup
 
 First of all, create a new environment file:
 
