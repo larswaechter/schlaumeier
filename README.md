@@ -39,7 +39,7 @@ B: Paris
 
 ## Setup
 
-First of all, create a new env file:
+First of all, create a new environment file:
 
 ```bash
 cp .env.example .env
@@ -51,12 +51,14 @@ Enter your ChatGPT API KEY:
 GPT_KEY="YOUR_KEY"
 ```
 
-Next, enter the display coordinates of the first and last answer.
+Next, enter the display coordinates of answer A and D.
 
 ```
 COORD_ANSW_A="300-1600"
 COORD_ANSW_D="800-1900"
 ```
+
+TIP: You can find them easily enabling [Pointer Location](https://developer.android.com/studio/debug/dev-options#input) in your phone's developer options.
 
 <img src="./examples/screen.jpg" height="600">
 
