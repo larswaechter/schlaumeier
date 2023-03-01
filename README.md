@@ -58,7 +58,7 @@ COORD_ANSW_A="300-1600"
 COORD_ANSW_D="800-1900"
 ```
 
-![Screenshot](./examples/screen.jpg)
+<img src="./examples/screen.jpg" height="600">
 
 `COORD_ANSW_A` and `COORD_ANSW_D` are the coordinates of answer A and D. Here, "London" and "Berlin". The coordinates have to be within the touch area of the answer. They are later used to trigger the touch event when selecting the answer.
 
@@ -74,9 +74,11 @@ SLICE_ANSW_D="1825:2135-565:1015"
 
 In this example, the cropped image for answer A looks like this:
 
-![Answer 1](./examples/answ_1.jpg)
+<img src="./examples/answ_A.jpg" height="150">
 
 Make sure to remove alls the black border when cropping the image. Otherwise, there might be some problems recognizing the text parts. Again, the slices for answer B and C are automatically calculated based on A and D.
+
+See more examples [here](https://github.com/larswaechter/qp-solver/tree/main/examples).
 
 Next, install the Python requirements:
 
