@@ -112,8 +112,6 @@ while(True):
     question += "? D: " + texts[4]
     question += "? A, B, C or D?"
 
-    print(question)
-
     print(texts)
 
     # Ask ChatGPT
