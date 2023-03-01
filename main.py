@@ -2,6 +2,7 @@ import sys
 import os
 import cv2
 import openai
+from time import sleep
 from dotenv import load_dotenv
 from ppadb.client import Client
 from pytesseract import pytesseract
@@ -19,12 +20,29 @@ if(not len(devices)):
 
 device = devices[0]
 
+# Answers' center coordinates [x, y]
+ANSW_A = [int(x) for x in os.getenv('COORD_ANSW_A').split("-")]
+ANSW_D = [int(x) for x in os.getenv('COORD_ANSW_D').split("-")]
+ANSW_B = [ANSW_D[0], ANSW_A[1]]
+ANSW_C = [ANSW_A[0], ANSW_D[1]]
+
 ANSWERS_COORD = {
-    "A": [300, 1600],
-    "B": [800, 1600],
-    "C": [300, 1900],
-    "D": [800, 1900]
+    "A": ANSW_A,
+    "B": ANSW_B,
+    "C": ANSW_C,
+    "D": ANSW_D
 }
+
+# Text area slices [[hFrom, hTo], [wFrom, wTo]]
+SLICE_Q = [int(x) for x in os.getenv('SLICE_Q').split(":")]
+SLICE_A1 = [[int(x[0]), int(x[1])] for x in (wh.split(":") for wh in os.getenv('SLICE_A1').split("-"))]
+SLICE_A4 = [[int(x[0]), int(x[1])] for x in (wh.split(":") for wh in os.getenv('SLICE_A4').split("-"))]
+SLICE_A2 = [SLICE_A1[0], SLICE_A4[1]]
+SLICE_A3 = [SLICE_A4[0], SLICE_A1[1]]
+
+SLICES = [
+    SLICE_A1, SLICE_A2, SLICE_A3, SLICE_A4
+]
 
 while(True):
 
@@ -42,16 +60,16 @@ while(True):
     src = cv2.imread("./screenshots/screen.jpg")
     # cv2.imwrite('croppy.jpg', src[500:1400, :])
 
-    # Cropped areas
-    img_q = src[700:1400, :]
-    img_a1 = src[1465:1775, 65:515]
-    img_a2 = src[1465:1775, 565:1015]
-    img_a3 = src[1825:2135, 65:515]
-    img_a4 = src[1825:2135, 565:1015]
+    [dHeight, dWidth, _] = src.shape
+
+    # Cropped areas (y|x)
+    img_q = src[SLICE_Q[0]:SLICE_Q[1], :]
+    images = [img_q]
+
+    for _slice in SLICES:
+        images.append(src[_slice[0][0]:_slice[0][1], _slice[1][0]:_slice[1][1]])
 
     texts = []
-    images = [img_q, img_a1, img_a2, img_a3, img_a4]
-
     print("\nExtracting texts...")
     for idx, img in enumerate(images):
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
@@ -119,7 +137,11 @@ while(True):
 
     print("\nEntering answer {}...".format(answer))
     [x, y] = ANSWERS_COORD.get(answer)
-    device.shell("input tap {} {}".format(x, y))
+    device.input_tap(x, y)
 
     input("\nPress any key to continue...")
     print("----------------------------------\n")
+
+    # Continue to next question
+    device.input_tap(dWidth / 2, dHeight / 2)
+    sleep(1.5)
