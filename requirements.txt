@@ -1,0 +1,4 @@
+openai==0.26.5
+opencv-python==4.7.0.72
+python-dotenv==1.0.0
+pytesseract==0.3.10
