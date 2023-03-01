@@ -58,7 +58,7 @@ COORD_ANSW_A="300-1600"
 COORD_ANSW_D="800-1900"
 ```
 
-TIP: You can find them easily by enabling [Pointer Location](https://developer.android.com/studio/debug/dev-options#input) in your phone's developer options.
+**TIP**: You can find them easily by enabling [Pointer Location](https://developer.android.com/studio/debug/dev-options#input) in your phone's developer options.
 
 <img src="./examples/screen.jpg" height="600">
 
