@@ -83,7 +83,6 @@ for idx, img in enumerate(images):
         text = text.replace("\n", " ").replace("  ", " ").strip()
 
         if(len(text)):
-            print(text)
             texts.append(text)
 
 # Build question with possible answers
@@ -96,21 +95,19 @@ question += "? A, B, C or D?"
 
 print(texts)
 
-quit()
-
-# Ask Chat-GPT
+# Ask ChatGPT
 openai.api_key = os.getenv('GPT_KEY')
 completions = openai.Completion.create(
     engine="text-davinci-003",
     prompt=question,
-    max_tokens=1024,
+    max_tokens=50,
     n=1,
     stop=None,
     temperature=0.5,
 )
 
 message = completions.choices[0].text.strip()
-print(message, "letter=" + message[0:1])
+print(message, "input=" + message[0:1])
 
 answer = message[0:1]
 
@@ -118,6 +115,6 @@ if(not answer in ANSWERS_COORD):
     print(("No clear answer found!"))
     quit()
 
+# Simulate touch
 [x, y] = ANSWERS_COORD.get(answer)
-
 device.shell("input tap {} {}".format(x, y))
