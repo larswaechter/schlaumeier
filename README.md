@@ -1,6 +1,6 @@
-# qp-solver
+# mastermind
 
-qp-solver is an example Python script that demonstrates how quiz apps can be automatically solved using [ADB](https://developer.android.com/studio/command-line/adb), [OpenCV](https://opencv.org/) and OpenAI's [ChatGPT API](https://openai.com/blog/gpt-3-apps). In this example, I'm using it for solving the game [Quiz Planet](https://play.google.com/store/apps/details?id=com.lotum.quizplanet&hl=en&gl=US) but other ones should work too.
+mastermind is an example Python script that demonstrates how quiz apps can be automatically solved using [ADB](https://developer.android.com/studio/command-line/adb), [OpenCV](https://opencv.org/) and OpenAI's [ChatGPT API](https://openai.com/blog/gpt-3-apps). In this example, I'm using it for solving the game [Quiz Planet](https://play.google.com/store/apps/details?id=com.lotum.quizplanet&hl=en&gl=US) but other ones should work too.
 
 Note that since ChatGPT isn't perfect, the answers are not always correct.
 

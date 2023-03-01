@@ -35,13 +35,13 @@ ANSWERS_COORD = {
 
 # Text area slices [[hFrom, hTo], [wFrom, wTo]]
 SLICE_Q = [int(x) for x in os.getenv('SLICE_Q').split(":")]
-SLICE_A1 = [[int(x[0]), int(x[1])] for x in (wh.split(":") for wh in os.getenv('SLICE_ANSW_A').split("-"))]
-SLICE_A4 = [[int(x[0]), int(x[1])] for x in (wh.split(":") for wh in os.getenv('SLICE_ANSW_D').split("-"))]
-SLICE_A2 = [SLICE_A1[0], SLICE_A4[1]]
-SLICE_A3 = [SLICE_A4[0], SLICE_A1[1]]
+SLICE_ANSW_A = [[int(x[0]), int(x[1])] for x in (wh.split(":") for wh in os.getenv('SLICE_ANSW_A').split("-"))]
+SLICE_ANSW_D = [[int(x[0]), int(x[1])] for x in (wh.split(":") for wh in os.getenv('SLICE_ANSW_D').split("-"))]
+SLICE_ANSW_B = [SLICE_ANSW_A[0], SLICE_ANSW_D[1]]
+SLICE_ANSW_C = [SLICE_ANSW_D[0], SLICE_ANSW_A[1]]
 
 SLICES = [
-    SLICE_A1, SLICE_A2, SLICE_A3, SLICE_A4
+    SLICE_ANSW_A, SLICE_ANSW_B, SLICE_ANSW_C, SLICE_ANSW_D
 ]
 
 while(True):
