@@ -1,3 +1,3 @@
 # qp-solver
 
-Quit Planet Solver
+Quiz Planet Solver using OpenCV and ChatGPT.
