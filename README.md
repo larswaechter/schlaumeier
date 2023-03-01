@@ -1,13 +1,15 @@
 # 🧙‍♂️ schlaumeier
 
-_schlaumeier_ is a Python script that allows you to automatically solve smartphone quiz apps like [Quiz Planet](https://play.google.com/store/apps/details?id=com.lotum.quizplanet&hl=en&gl=US) or [QuizDuel!](https://play.google.com/store/apps/details?id=se.maginteractive.quizduel2&hl=en&gl=US) using [ADB](https://developer.android.com/studio/command-line/adb), [OpenCV](https://opencv.org/) and OpenAI's [ChatGPT API](https://openai.com/blog/gpt-3-apps). In this example, I'm using it for solving questions from the game Quiz Planet but other ones should work as well with some adjustments.
+_schlaumeier_ is a Python script that allows you to automatically solve smartphone quiz apps like [Quiz Planet](https://play.google.com/store/apps/details?id=com.lotum.quizplanet&hl=en&gl=US) or [QuizDuel!](https://play.google.com/store/apps/details?id=se.maginteractive.quizduel2&hl=en&gl=US) using [ADB](https://developer.android.com/studio/command-line/adb), [OpenCV](https://opencv.org/) and OpenAI's [ChatGPT API](https://openai.com/blog/gpt-3-apps). In my case, I'm using it for solving questions from the game Quiz Planet but other ones should work as well with some adjustments.
 
 Note that since ChatGPT isn't perfect, the answers given are not always correct too. For predicting the answer to a question, OpenAI's [`gpt-3.5-turbo`](https://platform.openai.com/docs/models/gpt-3-5) model is used.
+
+Always remember: **play fair** and love the game.
 
 ## 💡 How it works
 
 _schlaumeier_ makes use of two fancy technologies: [optical character recognition
-](https://en.wikipedia.org/wiki/Optical_character_recognition) and [large language models](https://blogs.nvidia.com/blog/2023/01/26/what-are-large-language-models-used-for/#:~:text=A%20large%20language%20model%2C%20or,successful%20applications%20of%20transformer%20models.) The idea behind it, is actually quite simple:
+](https://en.wikipedia.org/wiki/Optical_character_recognition) and [large language models](https://blogs.nvidia.com/blog/2023/01/26/what-are-large-language-models-used-for/#:~:text=A%20large%20language%20model%2C%20or,successful%20applications%20of%20transformer%20models.). The idea behind it, is actually quite simple:
 
 1. Take a screenshot of the app using ADB
 2. Slice the screenshot in 5 areas
