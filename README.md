@@ -78,7 +78,7 @@ In this example, the cropped image for answer A looks like this:
 
 <img src="./examples/answ_A.jpg" height="150">
 
-Make sure to remove alls the black border when cropping the image. Otherwise, there might be some problems recognizing the text parts. Again, the slices for answer B and C are automatically calculated based on A and D. See more examples [here](https://github.com/larswaechter/qp-solver/tree/main/examples).
+Make sure to remove alls the black border when cropping the image. Otherwise, there might be some problems recognizing the text parts. Again, the slices for answer B and C are automatically calculated based on A and D. See more examples [here](https://github.com/larswaechter/quizmaster/tree/main/examples).
 
 Next, install the Python requirements:
 
