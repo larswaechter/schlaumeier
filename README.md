@@ -4,7 +4,7 @@ _schlaumeier_ is a Python script that allows you to automatically solve smartpho
 
 Note that since ChatGPT isn't perfect, the answers given are not always correct too. For predicting the answer to a question, OpenAI's [`gpt-3.5-turbo`](https://platform.openai.com/docs/models/gpt-3-5) model is used.
 
-Always remember: **play fair** and love the game.
+Always remember: **play fair** and love the game♎.
 
 ## 💡 How it works
 
