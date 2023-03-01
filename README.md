@@ -1,6 +1,6 @@
 # schlaumeier
 
-_schlaumeier_ is a Python script that allows you to automatically solve smartphone quiz apps like [Quiz Planet](https://play.google.com/store/apps/details?id=com.lotum.quizplanet&hl=en&gl=US) or [QuizDuel!](https://play.google.com/store/apps/details?id=se.maginteractive.quizduel2&hl=en&gl=US) using [ADB](https://developer.android.com/studio/command-line/adb), [OpenCV](https://opencv.org/) and OpenAI's [ChatGPT API](https://openai.com/blog/gpt-3-apps). In this example, I'm using it for solving questions from the game Quiz Planet but other ones should work as well with some adjustments.
+schlaumeier🧙‍♂️ is a Python script that allows you to automatically solve smartphone quiz apps like [Quiz Planet](https://play.google.com/store/apps/details?id=com.lotum.quizplanet&hl=en&gl=US) or [QuizDuel!](https://play.google.com/store/apps/details?id=se.maginteractive.quizduel2&hl=en&gl=US) using [ADB](https://developer.android.com/studio/command-line/adb), [OpenCV](https://opencv.org/) and OpenAI's [ChatGPT API](https://openai.com/blog/gpt-3-apps). In this example, I'm using it for solving questions from the game Quiz Planet but other ones should work as well with some adjustments.
 
 Note that since ChatGPT isn't perfect, the answers given are not always correct too. For predicting the answer to a question, OpenAI's [`gpt-3.5-turbo`](https://platform.openai.com/docs/models/gpt-3-5) model is used.
 
@@ -23,11 +23,13 @@ A question prompted to ChatGPT looks like this:
 In which European capital can you find the fine arts museums known as the "Petit Palais” and the "Grand Palais"? A: London? B: Paris? C: Madrid? D: Berlin? A, B, C or D?
 ```
 
-ChatGPT's answer:
+As you can see, the possible solutions are provided in the question. ChatGPT's answer:
 
 ```
 B: Paris
 ```
+
+The given answer `B` is then processed in the following steps.
 
 ## 📝 Requirements
 
@@ -100,3 +102,7 @@ python ./main.py
 The script takes a screenshot and extracts each text part. During execution you'll see some helpful console output.
 
 The answer will be given automatically by the script. Afterwards, you can press any key to continue. In this case, a touch is simulated to go to the next question and the procedure is repeated. Press `Ctrl+c` to stop the script at any time.
+
+## 🔑 License
+
+_schlaumeier_ is released under [MIT](https://github.com/larswaechter/schlaumeier/blob/main/LICENSE) license.
