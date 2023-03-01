@@ -10,7 +10,7 @@ from pytesseract import pytesseract
 load_dotenv()
 
 # ADB setup
-print("Connecting to ADB...")
+print("Connecting to ADB📱")
 adb = Client(host="127.0.0.1", port=5037)
 devices = adb.devices()
 
@@ -51,7 +51,7 @@ while(True):
     for f in os.listdir(dir):
         os.remove(os.path.join(dir, f))
 
-    print("Taking screenshot...")
+    print("Taking screenshot📸")
     screenshot = device.screencap()
 
     with open("./screenshots/screen.jpg", "wb") as f:
@@ -70,7 +70,7 @@ while(True):
         images.append(src[_slice[0][0]:_slice[0][1], _slice[1][0]:_slice[1][1]])
 
     texts = []
-    print("\nExtracting texts...")
+    print("\nExtracting texts📋")
     for idx, img in enumerate(images):
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         cv2.imwrite('./screenshots/img_{}_gray.jpg'.format(idx), gray)
@@ -104,38 +104,38 @@ while(True):
             if(len(text)):
                 texts.append(text)
 
-    # Build question string with possible answers
-    question = texts[0]
-    question += " A: " + texts[1]
-    question += "? B: " + texts[2]
-    question += "? C: " + texts[3]
-    question += "? D: " + texts[4]
-    question += "? A, B, C or D?"
-
-    print(texts)
-
-    # Ask ChatGPT
-    print("\nPrompting ChatGPT...")
-    openai.api_key = os.getenv('GPT_KEY')
-    completions = openai.Completion.create(
-        engine="text-davinci-003",
-        prompt=question,
-        max_tokens=50,
-        n=1,
-        stop=None,
-        temperature=0.5,
-    )
-
-    message = completions.choices[0].text.strip()
-    print(message, "\t=>\tkey=" + message[0:1])
-
-    answer = message[0:1]
-
-    if(not answer in ANSWERS_COORD):
-        print("No clear answer found!")
+    if(not len(texts) == 5):
+        print("Could not recognize texts😟")
         answer = input('Enter alternative answer: ').upper()
+    else:
+        # Build question string with possible answers
+        question = texts[0]
+        question += " A: " + texts[1]
+        question += "? B: " + texts[2]
+        question += "? C: " + texts[3]
+        question += "? D: " + texts[4]
+        question += "? A, B, C or D?"
 
-    print("\nEntering answer {}...".format(answer))
+        print(texts)
+
+        # Ask ChatGPT
+        print("\nAsking ChatGPT🧠")
+        openai.api_key = os.getenv('GPT_KEY')
+        completions = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=[{"role": "user", "content": question}]
+        )
+
+        message = completions.choices[0].message.content.strip()
+        print(message, "\t=>\tkey=" + message[0:1])
+
+        answer = message[0:1]
+
+        if(not answer in ANSWERS_COORD):
+            print("No definite answer found😟")
+            answer = input('Enter alternative answer: ').upper()
+
+    print("\nEntering answer: {}👆".format(answer))
     [x, y] = ANSWERS_COORD.get(answer)
     device.input_tap(x, y)
 
