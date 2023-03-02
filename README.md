@@ -133,9 +133,11 @@ Last but not least run the script:
 ./run.sh
 ```
 
-The script takes a screenshot, extracts each text part and forwards the question to ChatGPT. During execution, you'll see some helpful console output. Moreover, the screenshots taken are saved to the [`screenshots`](https://github.com/larswaechter/schlaumeier/tree/main/screenshots) directory. They are deleted before each run.
+Alternatively, you can also run `main.py` directly.
 
-The answer will be given automatically by the script. Afterwards, you can press any key to continue. In this case, a touch is simulated to go to the next question and the procedure is repeated. Press `Ctrl+c` to stop the script at any time.
+The script starts the ADB server and waits for a device to be connected. As decribed above, _schlaumeier_ takes a screenshot, extracts each text part and forwards the question to ChatGPT. During execution, you'll see some helpful console output. Moreover, the screenshots are saved to the [`screenshots`](https://github.com/larswaechter/schlaumeier/tree/main/screenshots) directory. They are deleted before each run.
+
+The answer is automatically entered by the script using a touch event. Afterwards, you can press any key to continue. In this case, another touch is simulated to go to the next question and the procedure is repeated. Press `Ctrl+c` to stop the script at any time.
 
 ## 🔑 License
 
