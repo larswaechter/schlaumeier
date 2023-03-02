@@ -102,7 +102,7 @@ The final steps:
 python ./main.py
 ```
 
-The script takes a screenshot and extracts each text part. During execution you'll see some helpful console output.
+The script takes a screenshot, extracts each text part and forwards the question to ChatGPT. During execution, you'll see some helpful console output.
 
 The answer will be given automatically by the script. Afterwards, you can press any key to continue. In this case, a touch is simulated to go to the next question and the procedure is repeated. Press `Ctrl+c` to stop the script at any time.
 
