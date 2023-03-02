@@ -8,6 +8,8 @@ Always remember: **play fair** and love the game♎.
 
 ## 💡 How it works
 
+![Demo](./demo.gif)
+
 _schlaumeier_ makes use of two fancy technologies: [optical character recognition
 ](https://en.wikipedia.org/wiki/Optical_character_recognition) and [large language models](https://blogs.nvidia.com/blog/2023/01/26/what-are-large-language-models-used-for/#:~:text=A%20large%20language%20model%2C%20or,successful%20applications%20of%20transformer%20models.). The idea behind it, is actually quite simple:
 
