@@ -1,10 +1,10 @@
 # 🧙‍♂️ schlaumeier
 
-_schlaumeier_ is a Python script that allows you to automatically solve smartphone quiz apps like [Quiz Planet](https://play.google.com/store/apps/details?id=com.lotum.quizplanet&hl=en&gl=US) or [QuizDuel!](https://play.google.com/store/apps/details?id=se.maginteractive.quizduel2&hl=en&gl=US) using [ADB](https://developer.android.com/studio/command-line/adb), [OpenCV](https://opencv.org/) and OpenAI's [ChatGPT API](https://openai.com/blog/gpt-3-apps). In my case, I tested it for solving questions from the game Quiz Planet but other ones should work as well with some adjustments.
+_schlaumeier_ is a Python script that allows you to automatically solve smartphone quiz apps like [Quiz Planet](https://play.google.com/store/apps/details?id=com.lotum.quizplanet&hl=en&gl=US) or [QuizDuel!](https://play.google.com/store/apps/details?id=se.maginteractive.quizduel2&hl=en&gl=US) using [ADB](https://developer.android.com/studio/command-line/adb), [OpenCV](https://opencv.org/) and OpenAI's [ChatGPT API](https://openai.com/blog/gpt-3-apps). In my case, I have tested it for solving questions from the game Quiz Planet but other ones should work as well with some adjustments.
 
 Note that since ChatGPT isn't perfect, the answers given are not always correct too. For predicting the answer to a question, OpenAI's [`gpt-3.5-turbo`](https://platform.openai.com/docs/models/gpt-3-5) model is used.
 
-This software was written for research purposes and should not be used to gain an unfair advantage. Always remember: **play fair** and love the game♎.
+This software was written for research purposes only and should not be used to gain an unfair advantage over your opponent. Always remember: **play fair** and love the game♎.
 
 ## 💡 How it works
 
