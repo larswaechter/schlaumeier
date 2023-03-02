@@ -117,6 +117,8 @@ docker run \
    schlaumeier
 ```
 
+Make sure that there's no ADB server instance running on your host machine.
+
 ### Native
 
 For the native setup, the tools listed above are required and you have to install the pip packages:
@@ -131,7 +133,7 @@ Last but not least run the script:
 ./run.sh
 ```
 
-The script takes a screenshot, extracts each text part and forwards the question to ChatGPT. During execution, you'll see some helpful console output. Moreover, the screenshots taken are saved to the [`screenshots`](https://github.com/larswaechter/schlaumeier/tree/main/examples) directory. They are deleted before each run.
+The script takes a screenshot, extracts each text part and forwards the question to ChatGPT. During execution, you'll see some helpful console output. Moreover, the screenshots taken are saved to the [`screenshots`](https://github.com/larswaechter/schlaumeier/tree/main/screenshots) directory. They are deleted before each run.
 
 The answer will be given automatically by the script. Afterwards, you can press any key to continue. In this case, a touch is simulated to go to the next question and the procedure is repeated. Press `Ctrl+c` to stop the script at any time.
 
