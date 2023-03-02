@@ -36,6 +36,8 @@ B: Paris
 
 The given answer `B` is then processed in the following steps.
 
+At the moment, the agent does not work completely autonomously. There's still some interaction of the user required. However, this depends on the game and can be changed according to personal preferences.
+
 ## 📝 Requirements
 
 - Android Smartphone
