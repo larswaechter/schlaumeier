@@ -10,15 +10,20 @@ from pytesseract import pytesseract
 load_dotenv()
 
 # ADB setup
-print("Connecting to ADB📱")
-adb = Client(host="127.0.0.1", port=5037)
-devices = adb.devices()
+def wait_for_device():
+    print("📲 Connecting to ADB...")
+    adb = Client(host="127.0.0.1", port=5037)
+    devices = adb.devices()
 
-if(not len(devices)):
-    print("No device attached!")
-    quit()
+    if(not len(devices)):
+        print("📵 No device found! Retrying in 5s...\n")
+        sleep(5)
+        return wait_for_device()
+    
+    print("📱 Connected!\n")
+    return devices[0]
 
-device = devices[0]
+device = wait_for_device()
 
 # Answers' center coordinates [x, y]
 ANSW_A = [int(x) for x in os.getenv('COORD_ANSW_A').split("-")]
@@ -49,9 +54,10 @@ while(True):
     # Delete screenshots
     dir = './screenshots'
     for f in os.listdir(dir):
-        os.remove(os.path.join(dir, f))
+        if f != ".gitkeep":
+            os.remove(os.path.join(dir, f))
 
-    print("Taking screenshot📸")
+    print("📸 Taking screenshot...")
     screenshot = device.screencap()
 
     with open("./screenshots/screen.jpg", "wb") as f:
@@ -70,7 +76,7 @@ while(True):
         images.append(src[_slice[0][0]:_slice[0][1], _slice[1][0]:_slice[1][1]])
 
     texts = []
-    print("\nExtracting texts📋")
+    print("\n📋 Extracting texts...")
     for idx, img in enumerate(images):
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         cv2.imwrite('./screenshots/img_{}_gray.jpg'.format(idx), gray)
@@ -105,7 +111,7 @@ while(True):
                 texts.append(text)
 
     if(not len(texts) == 5):
-        print("Could not recognize texts😟")
+        print("😟 Could not recognize texts")
         answer = input('Enter alternative answer: ').upper()
     else:
         # Build question string with possible answers
@@ -119,7 +125,7 @@ while(True):
         print(texts)
 
         # Ask ChatGPT
-        print("\nAsking ChatGPT🧠")
+        print("\n🧠 Asking ChatGPT...")
         openai.api_key = os.getenv('GPT_KEY')
         completions = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
@@ -127,15 +133,15 @@ while(True):
         )
 
         message = completions.choices[0].message.content.strip()
-        print(message, "\t=>\tkey=" + message[0:1])
+        print("🙋 Answer given: " + message)
 
         answer = message[0:1]
 
         if(not answer in ANSWERS_COORD):
-            print("No definite answer found😟")
+            print("😟 No definite answer found")
             answer = input('Enter alternative answer: ').upper()
 
-    print("\nEntering answer: {}👆".format(answer))
+    print("\n👆 Entering answer: {}".format(answer))
     [x, y] = ANSWERS_COORD.get(answer)
     device.input_tap(x, y)
 

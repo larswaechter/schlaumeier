@@ -44,9 +44,13 @@ At the moment, the agent does not work completely autonomously. There's still so
 - Android Smartphone
   - Root is **not** required
   - [USB-Debugging](https://developer.android.com/studio/debug/dev-options#Enable-debugging) enabled
-- [Python](https://www.python.org/)
 - [ChatGPT API Key](https://devopsforu.com/how-to-connect-to-chat-gpt-api/)
-- [Tesseract](https://github.com/tesseract-ocr/tesseract)
+- Docker Setup
+  - [Docker](https://www.docker.com/)
+- Native Setup
+  - [Python](https://www.python.org/)
+  - [Tesseract](https://github.com/tesseract-ocr/tesseract)
+  - [ADB-Tools](https://developer.android.com/studio/command-line/adb)
 
 ## 🖥️ Setup
 
@@ -58,16 +62,15 @@ cp .env.example .env
 
 Enter your ChatGPT API KEY:
 
-```python
-GPT_KEY="YOUR_KEY"
+```
+GPT_KEY=YOUR_KEY
 ```
 
-Next, enter the screen `x` and `y` coordinates of the answers A and D.
+Next, enter the screen `x` and `y` coordinates of the answers A and D. The values are encoded as `x-y`.
 
-```python
-# Format: x-y
-COORD_ANSW_A="300-1600"
-COORD_ANSW_D="800-1900"
+```
+COORD_ANSW_A=300-1600
+COORD_ANSW_D=800-1900
 ```
 
 **TIP**: You can find them easily by enabling [Pointer Location](https://developer.android.com/studio/debug/dev-options#input) in your phone's developer options.
@@ -78,13 +81,12 @@ COORD_ANSW_D="800-1900"
 
 The coordinates for answer B and C are automatically calculated based on A and D. So you don't have to provide them.
 
-Now, enter the screen slices for the question and answer A / D. They are later used to crop the screenshot in 5 smaller images and to extract the text in them. The values are encoded as: `"hFrom:hTo-wFrom:wTo"`.
+Now, enter the screen slices for the question and answer A / D. They are later used to crop the screenshot in 5 smaller images and to extract the text in them. The values are encoded as `hFrom:hTo-wFrom:wTo`.
 
-```python
-# Format: hFrom:hTo-wFrom:wTo
-SLICE_Q="700:1400"
-SLICE_ANSW_A="1465:1775-65:515"
-SLICE_ANSW_D="1825:2135-565:1015"
+```
+SLICE_Q=700:1400
+SLICE_ANSW_A=1465:1775-65:515
+SLICE_ANSW_D=1825:2135-565:1015
 ```
 
 In this example, the cropped image for answer A looks like this:
@@ -93,24 +95,43 @@ In this example, the cropped image for answer A looks like this:
 
 The green rectangle marks the text in the image. Make sure that there's no border left when cropping the image. Otherwise, there might be some problems recognizing the text snippets. Again, the slices for answer B and C are automatically calculated based on A and D. See more examples [here](https://github.com/larswaechter/quizmaster/tree/main/examples).
 
-Next, install the Python requirements:
+For the next steps, make sure your phone is **connected via USB**. You might have to allow USB debugging when running the script. You can run _schlaumeier_ either with Docker or natively.
+
+### Docker
+
+Build the docker image:
+
+```bash
+docker build . -t schlaumeier
+```
+
+and run it:
+
+```bash
+docker run \
+   --privileged \
+   --env-file .env \
+   --rm \
+   -p 5037:5037 \
+   -it \
+   schlaumeier
+```
+
+### Native
+
+For the native setup, the tools listed above are required and you have to install the pip packages:
 
 ```bash
 pip install -r ./requirements.txt
 ```
 
-The final steps:
-
-1. Connect your phone using USB
-2. Start a new Quiz Planet match
-3. Wait for the question window
-4. Run the script:
+Last but not least run the script:
 
 ```bash
-python ./main.py
+./run.sh
 ```
 
-The script takes a screenshot, extracts each text part and forwards the question to ChatGPT. During execution, you'll see some helpful console output.
+The script takes a screenshot, extracts each text part and forwards the question to ChatGPT. During execution, you'll see some helpful console output. Moreover, the screenshots taken are saved to the [`screenshots`](https://github.com/larswaechter/schlaumeier/tree/main/examples) directory. They are deleted before each run.
 
 The answer will be given automatically by the script. Afterwards, you can press any key to continue. In this case, a touch is simulated to go to the next question and the procedure is repeated. Press `Ctrl+c` to stop the script at any time.
 
