@@ -91,6 +91,8 @@ class TestExtract(unittest.TestCase):
         img = cv2.imread("./tests/question_2.jpg")
         texts = extract_texts(img, slices)
 
+        print(texts)
+
         self.assertEqual(len(texts), 5)
         self.assertEqual(texts[0], 'Who wrote the sci-fi book "Neuromancer"?')
         self.assertEqual(texts[1], 'Arthur C. Clarke')
