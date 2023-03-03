@@ -1,17 +1,17 @@
 # 🧙‍♂️ schlaumeier
 
-_schlaumeier_ is a Python script that allows you to automatically solve Android quiz games like [QuizDuel](https://play.google.com/store/apps/details?id=se.maginteractive.quizduel2&hl=en&gl=US), [Quiz Planet](https://play.google.com/store/apps/details?id=com.lotum.quizplanet&hl=en&gl=US) or [General Knowledge Quiz](https://play.google.com/store/apps/details?id=com.timleg.quiz&hl=en&gl=US) using [ADB](https://developer.android.com/studio/command-line/adb), [OpenCV](https://opencv.org/) and OpenAI's [ChatGPT API](https://openai.com/blog/gpt-3-apps). In my case, I have tested it for solving questions from the game Quiz Planet but other ones should work as well with some adjustments. _schlaumeier_ works by creating a screenshot, extracting the question and passing it to ChatGPT. See below for more details.
+_schlaumeier_ is a Python script that allows you to automatically solve Android quiz games like [QuizDuel](https://play.google.com/store/apps/details?id=se.maginteractive.quizduel2&hl=en&gl=US), [Quiz Planet](https://play.google.com/store/apps/details?id=com.lotum.quizplanet&hl=en&gl=US) or [General Knowledge Quiz](https://play.google.com/store/apps/details?id=com.timleg.quiz&hl=en&gl=US) using [ADB](https://developer.android.com/studio/command-line/adb), [OpenCV](https://opencv.org/) and OpenAI's [ChatGPT API](https://openai.com/blog/gpt-3-apps). In my case, I have tested it for solving questions from the game Quiz Planet but other ones should work as well with some adjustments. The script works by creating a screenshot, extracting the question and passing it to ChatGPT. See below for more details on how it works.
 
-Note that since ChatGPT isn't perfect, the answers given are not always correct too. Moreover, the API response times might play a role depending on the game. For predicting the answer to a question, OpenAI's [`gpt-3.5-turbo`](https://platform.openai.com/docs/models/gpt-3-5) model is used.
+Note that since ChatGPT isn't perfect and has limited knowledge, the answers given are not always correct too. Moreover, the API response times might play a role depending on the game. For predicting the answer to a question, OpenAI's [`gpt-3.5-turbo`](https://platform.openai.com/docs/models/gpt-3-5) model is used.
 
-This software was written for research purposes only and should not be used to gain an unfair advantage in the game. Most games **prohibit** the use of such tools. Always remember: **play fair** and respect the game♎.
+This software was written for research purposes only and should not be used to gain an unfair advantage in any game. Most games **prohibit** the use of such tools. Always remember: **play fair** and respect the game♎.
 
 ## 💡 How it works
 
 ![Demo](./demo.gif)
 
 _schlaumeier_ makes use of two technologies: [optical character recognition
-](https://en.wikipedia.org/wiki/Optical_character_recognition) (OCR) and [large language models](https://blogs.nvidia.com/blog/2023/01/26/what-are-large-language-models-used-for/#:~:text=A%20large%20language%20model%2C%20or,successful%20applications%20of%20transformer%20models.) (LLM). The core idea behind it, is actually quite simple:
+](https://en.wikipedia.org/wiki/Optical_character_recognition) (OCR) and [large language models](https://blogs.nvidia.com/blog/2023/01/26/what-are-large-language-models-used-for/#:~:text=A%20large%20language%20model%2C%20or,successful%20applications%20of%20transformer%20models.) (LLMs). The core idea behind it, is actually quite simple:
 
 1. Take a screenshot of the app using ADB
 2. Slice the screenshot in 5 areas
@@ -22,6 +22,7 @@ _schlaumeier_ makes use of two technologies: [optical character recognition
    - Including the possible answers
 5. Extract the model's answer
 6. "Touch" the answer on your phone using ADB
+7. Repeat the procedure for each question
 
 A question prompted to ChatGPT might looks like this for example:
 
@@ -101,13 +102,13 @@ For the next steps, make sure your phone is **connected via USB**. You might hav
 
 ### Docker
 
-Build the docker image:
+Build the Docker image:
 
 ```bash
 docker build . -t schlaumeier
 ```
 
-and run it:
+and run a new container:
 
 ```bash
 docker run \
