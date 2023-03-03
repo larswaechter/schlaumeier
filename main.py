@@ -7,8 +7,8 @@ from dotenv import load_dotenv
 from ppadb.client import Client
 from pytesseract import pytesseract
 
-# ADB setup
 def wait_for_device():
+    """Waits for a device to be connected via USB and returns it."""
     print("📲 Connecting to ADB...")
     adb = Client(host="127.0.0.1", port=5037)
     devices = adb.devices()
@@ -21,17 +21,20 @@ def wait_for_device():
     print("📱 Connected!\n")
     return devices[0]
 
-# Text area slices [[hFrom, hTo], [wFrom, wTo]]
-def build_slices(dim_q, dim_answ_a, dim_answ_d):
-    slice_q = [[int(x) for x in dim_q.split(":")]]
-    slice_answ_a = [[int(x[0]), int(x[1])] for x in (wh.split(":") for wh in dim_answ_a.split("-"))]
-    slice_answ_d = [[int(x[0]), int(x[1])] for x in (wh.split(":") for wh in dim_answ_d.split("-"))]
-    slice_answ_b = [slice_answ_a[0], slice_answ_d[1]]
-    slice_answ_c = [slice_answ_d[0], slice_answ_a[1]]
+def parse_slice_dimensions(dim):
+    """Parses the given slice dimenions in a 2D array and returns it."""
+    return [[int(x[0]), int(x[1])] for x in (wh.split(":") for wh in dim.split("-"))]
 
-    return [slice_q, slice_answ_a, slice_answ_b, slice_answ_c, slice_answ_d]
+def calc_slice_center(_slice):
+    """Calculates the center of the given slice and returns it."""
+    return [(_slice[1][0] + _slice[1][1]) / 2, (_slice[0][0] + _slice[0][1]) / 2]
+
+def parse_slices(slices):
+    """Parses the given slices."""
+    return [parse_slice_dimensions(_slice) for _slice in slices]
 
 def extract_texts(img, slices):
+    """Extracts the texts in the given image slices and returns them."""
     images = []
     for _slice in slices:
         if len(_slice) == 1:
@@ -76,6 +79,7 @@ def extract_texts(img, slices):
     return texts
 
 def prompt_chatgpt(question, gpt_key):
+    """Prompts a question to the ChatGPT API and returns the answer."""
     openai.api_key = gpt_key
     completions = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
@@ -87,23 +91,24 @@ def prompt_chatgpt(question, gpt_key):
 if __name__ == "__main__":
     load_dotenv()
 
+    # ADB setup
     device = wait_for_device()
 
-    # Answers' center coordinates [x, y]
-    ANSW_A = [int(x) for x in os.getenv('COORD_ANSW_A').split("-")]
-    ANSW_D = [int(x) for x in os.getenv('COORD_ANSW_D').split("-")]
-    ANSW_B = [ANSW_D[0], ANSW_A[1]]
-    ANSW_C = [ANSW_A[0], ANSW_D[1]]
-
-    ANSWERS_COORD = {
-        "A": ANSW_A,
-        "B": ANSW_B,
-        "C": ANSW_C,
-        "D": ANSW_D
-    }
-
     # Text area slices [[hFrom, hTo], [wFrom, wTo]]
-    SLICES = build_slices(os.getenv('SLICE_Q'), os.getenv('SLICE_ANSW_A'), os.getenv('SLICE_ANSW_D'))
+    SLICES = parse_slices([
+        os.getenv('SLICE_Q'),
+        os.getenv('SLICE_ANSW_A'),
+        os.getenv('SLICE_ANSW_B'),
+        os.getenv('SLICE_ANSW_C'),
+        os.getenv('SLICE_ANSW_D')
+    ])
+
+    ANSWERS_CENTER = {
+        "A": calc_slice_center(SLICES[1]),
+        "B": calc_slice_center(SLICES[2]),
+        "C": calc_slice_center(SLICES[3]),
+        "D": calc_slice_center(SLICES[4])
+    }
 
     while(True):
 
@@ -147,17 +152,17 @@ if __name__ == "__main__":
 
             answer = message[0]
 
-            if(not answer in ANSWERS_COORD):
+            if(not answer in ANSWERS_CENTER):
                 print("😟 No definite answer found")
                 answer = input('Enter alternative answer: ').upper()
 
         print("\n👆 Entering answer: {}".format(answer))
-        [x, y] = ANSWERS_COORD.get(answer)
+        [x, y] = ANSWERS_CENTER.get(answer)
         device.input_tap(x, y)
 
         input("\nPress any key to continue...")
         print("----------------------------------\n")
 
         # Continue to next question
-        device.input_tap(dWidth / 2, dHeight / 2)
-        sleep(1.5)
+        # device.input_tap(dWidth / 2, dHeight / 2)
+        # sleep(1.5)

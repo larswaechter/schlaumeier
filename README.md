@@ -1,5 +1,7 @@
 # 🧙‍♂️ schlaumeier
 
+[![Tests](https://github.com/larswaechter/schlaumeier/actions/workflows/tests.yaml/badge.svg)](https://github.com/larswaechter/schlaumeier/actions/workflows/tests.yaml)
+
 _schlaumeier_ is a Python script that allows you to automatically solve Android quiz games like [QuizDuel](https://play.google.com/store/apps/details?id=se.maginteractive.quizduel2&hl=en&gl=US), [Quiz Planet](https://play.google.com/store/apps/details?id=com.lotum.quizplanet&hl=en&gl=US) or [General Knowledge Quiz](https://play.google.com/store/apps/details?id=com.timleg.quiz&hl=en&gl=US) using [ADB](https://developer.android.com/studio/command-line/adb), [OpenCV](https://opencv.org/) and OpenAI's [ChatGPT API](https://openai.com/blog/gpt-3-apps). In my case, I have tested it for solving questions from the game Quiz Planet but other ones should work as well with some adjustments. The script works by creating a screenshot, extracting the question and passing it to ChatGPT. See below for more details on how it works.
 
 Note that since ChatGPT isn't perfect and has limited knowledge, the answers given are not always correct too. Moreover, the API response times might play a role depending on the game. For predicting the answer to a question, OpenAI's [`gpt-3.5-turbo`](https://platform.openai.com/docs/models/gpt-3-5) model is used.
@@ -69,36 +71,27 @@ Enter your ChatGPT API KEY:
 GPT_KEY=YOUR_KEY
 ```
 
-Next, enter the screen `x` and `y` coordinates of the answers A and D. The values are encoded as `x-y`.
+Next, enter the screen slices for the question and answers A-D. They are later used to crop the screenshot in 5 smaller images and to extract the text in them. The values are encoded as `hFrom:hTo-wFrom:wTo`.
 
 ```
-COORD_ANSW_A=300-1600
-COORD_ANSW_D=800-1900
+SLICE_Q=700:1400-0:1080
+SLICE_ANSW_A=1465:1775-65:515
+SLICE_ANSW_B=1465:1775-565:1015
+SLICE_ANSW_C=1825:2135-65:515
+SLICE_ANSW_D=1825:2135-565:1015
 ```
 
 **TIP**: You can find them easily by enabling [Pointer Location](https://developer.android.com/studio/debug/dev-options#input) in your phone's developer options.
 
 <img src="./examples/screen.jpg" height="600">
 
-`COORD_ANSW_A` and `COORD_ANSW_D` are the coordinates of answer A and D. Here, "London" and "Berlin". The coordinates have to be anywhere within the touch area (white rectangle) of the answer. They are later used to trigger the touch event when selecting an answer.
-
-The coordinates for answer B and C are automatically calculated based on A and D. So you don't have to provide them.
-
-Now, enter the screen slices for the question and answer A / D. They are later used to crop the screenshot in 5 smaller images and to extract the text in them. The values are encoded as `hFrom:hTo-wFrom:wTo`.
-
-```
-SLICE_Q=700:1400
-SLICE_ANSW_A=1465:1775-65:515
-SLICE_ANSW_D=1825:2135-565:1015
-```
-
 In this example, the cropped image for answer A looks like this:
 
 <img src="./examples/answ_A.jpg" height="150">
 
-The green rectangle marks the text in the image. Make sure that there's no border left when cropping the image. Otherwise, there might be some problems recognizing the text snippets. Again, the slices for answer B and C are automatically calculated based on A and D. See more examples [here](https://github.com/larswaechter/quizmaster/tree/main/examples).
+The green rectangle marks the text in the image. Make sure that there's no border left when cropping the image. Otherwise, there might be some problems recognizing the text snippets. See more examples [here](https://github.com/larswaechter/quizmaster/tree/main/examples).
 
-For the next steps, make sure your phone is **connected via USB**. You might have to allow USB debugging when running the script. You can run _schlaumeier_ either with Docker or natively.
+For the next steps, make sure your phone is **connected via USB**. You might have to allow the USB debugging connection on your phone when running the script. You can run _schlaumeier_ either with Docker or natively.
 
 ### Docker
 
