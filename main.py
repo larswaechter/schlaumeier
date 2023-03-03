@@ -1,4 +1,3 @@
-import sys
 import os
 import cv2
 import openai
@@ -7,31 +6,36 @@ from dotenv import load_dotenv
 from ppadb.client import Client
 from pytesseract import pytesseract
 
+
 def wait_for_device():
     """Waits for a device to be connected via USB and returns it."""
     print("📲 Connecting to ADB...")
     adb = Client(host='127.0.0.1', port=5037)
     devices = adb.devices()
 
-    if(not len(devices)):
+    if (not len(devices)):
         print('📵 No device found! Retrying in 5s...\n')
         sleep(5)
         return wait_for_device()
-    
+
     print('📱 Connected!\n')
     return devices[0]
+
 
 def parse_slice_dimensions(dim):
     """Parses the given slice dimenions in a 2D array and returns it."""
     return [[int(x[0]), int(x[1])] for x in (wh.split(":") for wh in dim.split("-"))]
 
+
 def calc_slice_center(_slice):
     """Calculates the center of the given slice and returns it."""
     return [(_slice[1][0] + _slice[1][1]) / 2, (_slice[0][0] + _slice[0][1]) / 2]
 
+
 def parse_slices(slices):
     """Parses the given slices."""
     return [parse_slice_dimensions(_slice) for _slice in slices]
+
 
 def extract_texts(img, slices):
     """Extracts the texts in the given image slices and returns them."""
@@ -40,43 +44,48 @@ def extract_texts(img, slices):
         if len(_slice) == 1:
             images.append(img[_slice[0][0]:_slice[0][1]])
         else:
-            images.append(img[_slice[0][0]:_slice[0][1], _slice[1][0]:_slice[1][1]])
+            images.append(img[_slice[0][0]:_slice[0][1],
+                          _slice[1][0]:_slice[1][1]])
 
     texts = []
     for idx, img in enumerate(images):
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         cv2.imwrite('./screenshots/img_{}_gray.jpg'.format(idx), gray)
 
-        ret, thresh1 = cv2.threshold(gray, 0, 255, cv2.THRESH_OTSU | cv2.THRESH_BINARY_INV)
+        ret, thresh1 = cv2.threshold(
+            gray, 0, 255, cv2.THRESH_OTSU | cv2.THRESH_BINARY_INV)
         cv2.imwrite('./screenshots/img_{}_tresh.jpg'.format(idx), thresh1)
 
         rect_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (12, 12))
-        dilation = cv2.dilate(thresh1, rect_kernel, iterations = 3)
-        cv2.imwrite('./screenshots/img_{}_dilation.jpg'.format(idx),dilation)
+        dilation = cv2.dilate(thresh1, rect_kernel, iterations=3)
+        cv2.imwrite('./screenshots/img_{}_dilation.jpg'.format(idx), dilation)
 
-        contours, hierarchy = cv2.findContours(dilation, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+        contours, _ = cv2.findContours(
+            dilation, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
 
         im2 = img.copy()
 
         for cnt in contours:
             x, y, w, h = cv2.boundingRect(cnt)
-            
+
             # Draw the bounding box on the text area
-            rect=cv2.rectangle(im2, (x, y), (x + w, y + h), (0, 255, 0), 2)
-            
+            rect = cv2.rectangle(im2, (x, y), (x + w, y + h), (0, 255, 0), 2)
+
             # Crop the bounding box area
             cropped = im2[y:y + h, x:x + w]
-            
-            cv2.imwrite('./screenshots/img_{}.jpg'.format(idx),rect)
-            
-            # Using tesseract on the cropped image area to get text
-            text = pytesseract.image_to_string(cropped, lang='eng') #, config='--psm 12')
-            text = text.replace("\n", " ").replace("  ", " ").replace('”', '"').replace('“', '"').strip()
 
-            if(len(text)):
+            cv2.imwrite('./screenshots/img_{}.jpg'.format(idx), rect)
+
+            # Using tesseract on the cropped image area to get text
+            text = pytesseract.image_to_string(
+                cropped, lang='eng')
+            text = text.replace("\n", " ").replace("  ", " ").strip()
+
+            if (len(text)):
                 texts.append(text)
 
     return texts
+
 
 def prompt_chatgpt(question, gpt_key):
     """Prompts a question to the ChatGPT API and returns the answer."""
@@ -87,6 +96,7 @@ def prompt_chatgpt(question, gpt_key):
     )
 
     return completions.choices[0].message.content.strip()
+
 
 if __name__ == '__main__':
     load_dotenv()
@@ -110,7 +120,7 @@ if __name__ == '__main__':
         'D': calc_slice_center(SLICES[4])
     }
 
-    while(True):
+    while (True):
 
         # Delete screenshots
         dir = './screenshots'
@@ -133,7 +143,7 @@ if __name__ == '__main__':
         texts = extract_texts(src, SLICES)
         print(texts)
 
-        if(not len(texts) == 5):
+        if (not len(texts) == 5):
             print('😟 Could not recognize texts')
             answer = input('Enter alternative answer: ').upper()
         else:
@@ -152,7 +162,7 @@ if __name__ == '__main__':
 
             answer = message[0]
 
-            if(not answer in ANSWERS_CENTER):
+            if (not answer in ANSWERS_CENTER):
                 print('😟 No definite answer found')
                 answer = input('Enter alternative answer: ').upper()
 

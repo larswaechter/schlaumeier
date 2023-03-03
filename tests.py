@@ -5,14 +5,18 @@ from collections import namedtuple
 from main import calc_slice_center, parse_slices, extract_texts
 
 # Devices Screen Slices
-SLICES = namedtuple('Device', ['SLICE_Q', 'SLICE_ANSW_A', 'SLICE_ANSW_B', 'SLICE_ANSW_C', 'SLICE_ANSW_D'])
-SLICES_G1 = SLICES("700:1400-0:1080", "1465:1775-65:515", '1465:1775-565:1015', '1825:2135-65:515', "1825:2135-565:1015")
-SLICES_G2 = SLICES("300:1000-0:1080", "1040:1280-50:1020", '1335:1575-50:1020', '1630:1870-50:1020', "1925:2165-50:1020")
+SLICES = namedtuple('Device', [
+                    'SLICE_Q', 'SLICE_ANSW_A', 'SLICE_ANSW_B', 'SLICE_ANSW_C', 'SLICE_ANSW_D'])
+SLICES_G1 = SLICES("700:1400-0:1080", "1465:1775-65:515",
+                   '1465:1775-565:1015', '1825:2135-65:515', "1825:2135-565:1015")
+SLICES_G2 = SLICES("300:1000-0:1080", "1040:1280-50:1020",
+                   '1335:1575-50:1020', '1630:1870-50:1020', "1925:2165-50:1020")
 
 
 class TestExtract(unittest.TestCase):
     def test_calc_slice_center(self):
-        self.assertEqual(calc_slice_center([[200, 400], [700, 1000]]), [850.0, 300.0])
+        self.assertEqual(calc_slice_center(
+            [[200, 400], [700, 1000]]), [850.0, 300.0])
 
     def test_build_slices(self):
         slices = parse_slices([
@@ -60,7 +64,6 @@ class TestExtract(unittest.TestCase):
         self.assertEqual(slices[4][1][0], 565)
         self.assertEqual(slices[4][1][1], 1015)
 
-
     def test_question_1(self):
         slices = parse_slices([
             SLICES_G1.SLICE_Q,
@@ -74,7 +77,8 @@ class TestExtract(unittest.TestCase):
         texts = extract_texts(img, slices)
 
         self.assertEqual(len(texts), 5)
-        self.assertEqual(texts[0], 'In which European capital can you find the fine arts museums known as the "Petit Palais" and the "Grand Palais"?')
+        self.assertEqual(
+            texts[0], 'In which European capital can you find the fine arts museums known as the "Petit Palais" and the "Grand Palais"?')
         self.assertEqual(texts[1], 'London')
         self.assertEqual(texts[2], 'Paris')
         self.assertEqual(texts[3], 'Madrid')
@@ -90,8 +94,6 @@ class TestExtract(unittest.TestCase):
 
         img = cv2.imread("./tests/question_2.jpg")
         texts = extract_texts(img, slices)
-
-        print(texts)
 
         self.assertEqual(len(texts), 5)
         self.assertEqual(texts[0], 'Who wrote the sci-fi book "Neuromancer"?')
@@ -132,7 +134,8 @@ class TestExtract(unittest.TestCase):
         texts = extract_texts(img, slices)
 
         self.assertEqual(len(texts), 5)
-        self.assertEqual(texts[0], 'What is a group of people that travels through the desert on camels?')
+        self.assertEqual(
+            texts[0], 'What is a group of people that travels through the desert on camels?')
         self.assertEqual(texts[1], 'Cordovan')
         self.assertEqual(texts[2], 'Caravan')
         self.assertEqual(texts[3], 'Catamaran')
