@@ -135,7 +135,7 @@ while(True):
         message = completions.choices[0].message.content.strip()
         print("🙋 Answer given: " + message)
 
-        answer = message[0:1]
+        answer = message[0]
 
         if(not answer in ANSWERS_COORD):
             print("😟 No definite answer found")

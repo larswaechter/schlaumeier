@@ -1,6 +1,6 @@
 # 🧙‍♂️ schlaumeier
 
-_schlaumeier_ is a Python script that allows you to automatically solve Android quiz games like [Quiz Planet](https://play.google.com/store/apps/details?id=com.lotum.quizplanet&hl=en&gl=US) or [QuizDuel!](https://play.google.com/store/apps/details?id=se.maginteractive.quizduel2&hl=en&gl=US) using [ADB](https://developer.android.com/studio/command-line/adb), [OpenCV](https://opencv.org/) and OpenAI's [ChatGPT API](https://openai.com/blog/gpt-3-apps). In my case, I have tested it for solving questions from the game Quiz Planet but other ones should work as well with some adjustments.
+_schlaumeier_ is a Python script that allows you to automatically solve Android quiz games like [QuizDuel](https://play.google.com/store/apps/details?id=se.maginteractive.quizduel2&hl=en&gl=US), [Quiz Planet](https://play.google.com/store/apps/details?id=com.lotum.quizplanet&hl=en&gl=US) or [General Knowledge Quiz](https://play.google.com/store/apps/details?id=com.timleg.quiz&hl=en&gl=US) using [ADB](https://developer.android.com/studio/command-line/adb), [OpenCV](https://opencv.org/) and OpenAI's [ChatGPT API](https://openai.com/blog/gpt-3-apps). In my case, I have tested it for solving questions from the game Quiz Planet but other ones should work as well with some adjustments. _schlaumeier_ works by creating a screenshot, extracting the question and passing it to ChatGPT. See below for more details.
 
 Note that since ChatGPT isn't perfect, the answers given are not always correct too. Moreover, the API response times might play a role depending on the game. For predicting the answer to a question, OpenAI's [`gpt-3.5-turbo`](https://platform.openai.com/docs/models/gpt-3-5) model is used.
 
@@ -29,7 +29,7 @@ A question prompted to ChatGPT might looks like this for example:
 In which European capital can you find the fine arts museums known as the "Petit Palais” and the "Grand Palais"? A: London? B: Paris? C: Madrid? D: Berlin? A, B, C or D?
 ```
 
-As you can see, the possible solutions are provided in the question. ChatGPT's answer:
+As you can see, the possible solutions are provided at the end of the question. ChatGPT's answer:
 
 ```
 B: Paris
@@ -37,7 +37,9 @@ B: Paris
 
 The given answer `B` is then processed in the following steps.
 
-At the moment, the agent does not work completely autonomously. There's still some interaction of the user required. However, this depends on the game and can be changed according to personal preferences.
+At the moment, the agent does not work completely autonomously. There's still some interaction of the user required. However, this depends on the game and can be changed according to personal preferences. Especially ads might interrupt the game flow.
+
+Feel free to create a [fork](https://github.com/larswaechter/schlaumeier/fork) and develop a variant for your prefered game!
 
 ## 📝 Requirements
 
