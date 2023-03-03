@@ -54,7 +54,7 @@ class TestSum(unittest.TestCase):
         texts = extract_texts(img, slices)
 
         self.assertEqual(len(texts), 5)
-        self.assertEqual(texts[0], 'In which European capital can you find the fine arts museums known as the "Petit Palais” and the "Grand Palais"?')
+        self.assertEqual(texts[0], 'In which European capital can you find the fine arts museums known as the "Petit Palais" and the "Grand Palais"?')
         self.assertEqual(texts[1], 'London')
         self.assertEqual(texts[2], 'Paris')
         self.assertEqual(texts[3], 'Madrid')
