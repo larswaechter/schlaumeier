@@ -46,7 +46,9 @@ Feel free to create a [fork](https://github.com/larswaechter/schlaumeier/fork) a
 
 ## 📝 Requirements
 
-- Android Smartphone
+The following software/hardware is required:
+
+- Android Smartphone (or emulator)
   - Root is **not** required
   - [USB-Debugging](https://developer.android.com/studio/debug/dev-options#Enable-debugging) enabled
 - [ChatGPT API Key](https://devopsforu.com/how-to-connect-to-chat-gpt-api/)
@@ -56,6 +58,21 @@ Feel free to create a [fork](https://github.com/larswaechter/schlaumeier/fork) a
   - [Python](https://www.python.org/)
   - [Tesseract](https://github.com/tesseract-ocr/tesseract)
   - [ADB-Tools](https://developer.android.com/studio/command-line/adb)
+
+Especially the Tesseract version plays a big role for extracting the texts. I'm using the following version which works quite good for me:
+
+```
+tesseract 5.3.0
+ leptonica-1.82.0
+  libgif 5.2.1 : libjpeg 8d (libjpeg-turbo 2.1.4) : libpng 1.6.39 : libtiff 4.5.0 : zlib 1.2.13 : libwebp 1.3.0 : libopenjp2 2.5.0
+ Found AVX2
+ Found AVX
+ Found FMA
+ Found SSE4.1
+ Found OpenMP 201511
+ Found libarchive 3.6.2 zlib/1.2.13 liblzma/5.2.9 bz2lib/1.0.8 liblz4/1.9.4 libzstd/1.5.2
+ Found libcurl/7.87.0 OpenSSL/3.0.8 zlib/1.2.13 brotli/1.0.9 zstd/1.5.2 libidn2/2.3.4 libpsl/0.21.2 (+libidn2/2.3.4) libssh2/1.10.0 nghttp2/1.52.0
+```
 
 ## 🖥️ Setup
 
@@ -71,7 +88,15 @@ Enter your ChatGPT API KEY:
 GPT_KEY=YOUR_KEY
 ```
 
-Next, enter the screen slices for the question and answers A-D. They are later used to crop the screenshot in 5 smaller images and to extract the text in them. The values are encoded as `hFrom:hTo-wFrom:wTo`.
+Enter the language for Tesseract. This should match the language of your Android Game. Make sure that you have the according [language pack](https://tesseract-ocr.github.io/tessdoc/Data-Files-in-different-versions.html) installed on your system.
+
+```
+TESSERACT_LANG=YOUR_LANG
+```
+
+Next, enter the screen slices for the question and answers A-D. They depend on your phone's display. The slices are later used to crop the screenshot in smaller images and to extract the text in each of them.
+
+The values (pixels) are encoded as `heightFrom:heightTo-widthFrom:widthTo`.
 
 ```
 SLICE_Q=700:1400-0:1080
@@ -83,15 +108,17 @@ SLICE_ANSW_D=1825:2135-565:1015
 
 **TIP**: You can find them easily by enabling [Pointer Location](https://developer.android.com/studio/debug/dev-options#input) in your phone's developer options.
 
+Assuming the following screenshot:
+
 <img src="./examples/screen.jpg" height="600">
 
-In this example, the cropped image for answer A looks like this:
+In this example, the pixel slice for answer A ranges vertically from `1465` to `1775` and horizontally from `65` to `515`. So the cropped image for answer A looks like this:
 
 <img src="./examples/answ_A.jpg" height="150">
 
-The green rectangle marks the text in the image. Make sure that there's no border left when cropping the image. Otherwise, there might be some problems recognizing the text snippets. See more examples [here](https://github.com/larswaechter/quizmaster/tree/main/examples).
+The green rectangle marks the text in the image. Make sure that there's no border left when cropping the image. Otherwise, you might get some problems when recognizing the text snippets. See more examples [here](https://github.com/larswaechter/quizmaster/tree/main/examples).
 
-For the next steps, make sure your phone is **connected via USB**. You might have to allow the USB debugging connection on your phone when running the script. You can run _schlaumeier_ either with Docker or natively.
+For the next steps, make sure your phone is **connected via USB**. You have to allow the USB debugging connection on your phone when running the script for the first time. You can run _schlaumeier_ either with Docker or natively.
 
 ### Docker
 

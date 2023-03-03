@@ -23,12 +23,12 @@ def wait_for_device():
 
 
 def parse_slice_dimensions(dim):
-    """Parses the given slice dimenions in a 2D array and returns it."""
+    """Parses the given slice dimenions to a 2D array and returns it."""
     return [[int(x[0]), int(x[1])] for x in (wh.split(":") for wh in dim.split("-"))]
 
 
 def calc_slice_center(_slice):
-    """Calculates the center of the given slice and returns it."""
+    """Calculates the center coordinates (x|y) of the given slice and returns it."""
     return [(_slice[1][0] + _slice[1][1]) / 2, (_slice[0][0] + _slice[0][1]) / 2]
 
 
@@ -37,15 +37,12 @@ def parse_slices(slices):
     return [parse_slice_dimensions(_slice) for _slice in slices]
 
 
-def extract_texts(img, slices):
+def extract_texts(img, slices, lang):
     """Extracts the texts in the given image slices and returns them."""
     images = []
     for _slice in slices:
-        if len(_slice) == 1:
-            images.append(img[_slice[0][0]:_slice[0][1]])
-        else:
-            images.append(img[_slice[0][0]:_slice[0][1],
-                          _slice[1][0]:_slice[1][1]])
+        images.append(img[_slice[0][0]:_slice[0][1],
+                      _slice[1][0]:_slice[1][1]])
 
     texts = []
     for idx, img in enumerate(images):
@@ -78,7 +75,7 @@ def extract_texts(img, slices):
 
             # Using tesseract on the cropped image area to get text
             text = pytesseract.image_to_string(
-                cropped, lang='eng')
+                cropped, lang=lang)
             text = text.replace("\n", " ").replace("  ", " ").strip()
 
             if (len(text)):
@@ -120,7 +117,11 @@ if __name__ == '__main__':
         'D': calc_slice_center(SLICES[4])
     }
 
+    input('❓ Open a question and and press any key to start...')
+
     while (True):
+
+        print('\n----------------------------------')
 
         # Delete screenshots
         dir = './screenshots'
@@ -128,7 +129,7 @@ if __name__ == '__main__':
             if f != ".gitkeep":
                 os.remove(os.path.join(dir, f))
 
-        print('📸 Taking screenshot...')
+        print('\n📸 Taking screenshot...')
         screenshot = device.screencap()
 
         with open('./screenshots/screen.jpg', 'wb') as f:
@@ -140,7 +141,7 @@ if __name__ == '__main__':
         [dHeight, dWidth, _] = src.shape
 
         print('\n📋 Extracting texts...')
-        texts = extract_texts(src, SLICES)
+        texts = extract_texts(src, SLICES, os.getenv('TESSERACT_LANG'))
         print(texts)
 
         if (not len(texts) == 5):
@@ -171,7 +172,6 @@ if __name__ == '__main__':
         device.input_tap(x, y)
 
         input('\nPress any key to continue...')
-        print('----------------------------------\n')
 
         # Continue to next question
         # device.input_tap(dWidth / 2, dHeight / 2)
