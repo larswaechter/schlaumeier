@@ -2,9 +2,9 @@
 
 [![Tests](https://github.com/larswaechter/schlaumeier/actions/workflows/tests.yaml/badge.svg)](https://github.com/larswaechter/schlaumeier/actions/workflows/tests.yaml)
 
-_schlaumeier_ is a Python script that allows you to automatically solve Android quiz games like [QuizDuel](https://play.google.com/store/apps/details?id=se.maginteractive.quizduel2&hl=en&gl=US), [Quiz Planet](https://play.google.com/store/apps/details?id=com.lotum.quizplanet&hl=en&gl=US) or [General Knowledge Quiz](https://play.google.com/store/apps/details?id=com.timleg.quiz&hl=en&gl=US) using [ADB](https://developer.android.com/studio/command-line/adb), [OpenCV](https://opencv.org/) and OpenAI's [ChatGPT API](https://openai.com/blog/gpt-3-apps). In my case, I have tested it for solving questions from the games _Quiz Planet_ and _General Knowledge Quiz_ but other ones should work as well with some adjustments. The script works by creating a screenshot, extracting the question and passing it to ChatGPT. See below for more details on how it works.
+_schlaumeier_ is a bot written in Python that allows you to automatically solve Android quiz games like [QuizDuel](https://play.google.com/store/apps/details?id=se.maginteractive.quizduel2&hl=en&gl=US), [Quiz Planet](https://play.google.com/store/apps/details?id=com.lotum.quizplanet&hl=en&gl=US) or [General Knowledge Quiz](https://play.google.com/store/apps/details?id=com.timleg.quiz&hl=en&gl=US) using [ADB](https://developer.android.com/studio/command-line/adb), [OpenCV](https://opencv.org/) and OpenAI's [ChatGPT API](https://openai.com/blog/gpt-3-apps). In my case, I have tested it for solving questions from the games _Quiz Planet_ and _General Knowledge Quiz_ but other ones should work as well with some adjustments. The script works by creating a screenshot, extracting the question and passing it to ChatGPT. See below for more details on how it works.
 
-Note that since ChatGPT isn't perfect and has limited knowledge, the answers given are not always correct too. Moreover, the API response times might play a role depending on the game. For predicting the answer to a question, OpenAI's [`gpt-3.5-turbo`](https://platform.openai.com/docs/models/gpt-3-5) model is used.
+Note that since ChatGPT isn't perfect and has limited knowledge, the answers given are not always correct too. Moreover, the API response times and its request limit might play a role depending on the game. For predicting the answer to a question, OpenAI's [`gpt-3.5-turbo`](https://platform.openai.com/docs/models/gpt-3-5) model is used.
 
 This software was written for research purposes only and should not be used to gain an unfair advantage in any game. Most games **prohibit** the use of such tools. Always remember: **play fair** and respect the game♎.
 
@@ -40,9 +40,9 @@ B: Paris
 
 The given answer `B` is then processed in the following steps.
 
-At the moment, the agent does not work completely autonomously. There's still some interaction of the user required. However, this depends on the game and can be changed according to personal preferences. Especially ads might interrupt the game flow.
+At the moment, the agent does not work completely autonomously. There's still some interaction of the user required. However, this depends on the game and can be changed according to personal preferences. Especially ads might interrupt the game flow. The Android Debug Bridge (ADB) is being used to trigger touch events and more on your phone.
 
-Feel free to create a [fork](https://github.com/larswaechter/schlaumeier/fork) and develop a variant for your prefered game!
+Feel free to create a [fork](https://github.com/larswaechter/schlaumeier/fork) and develop a version for your prefered game!
 
 ## 📝 Requirements
 
@@ -59,7 +59,7 @@ The following software/hardware is required:
   - [Tesseract](https://github.com/tesseract-ocr/tesseract)
   - [ADB-Tools](https://developer.android.com/studio/command-line/adb)
 
-Especially the Tesseract version plays a big role for extracting the texts. I'm using the following version which works quite good for me:
+Especially the Tesseract version, that is used to recognize texts on images, plays a major role. I've tested the following one, which works quite well for the English language:
 
 ```
 tesseract 5.3.0
@@ -73,6 +73,8 @@ tesseract 5.3.0
  Found libarchive 3.6.2 zlib/1.2.13 liblzma/5.2.9 bz2lib/1.0.8 liblz4/1.9.4 libzstd/1.5.2
  Found libcurl/7.87.0 OpenSSL/3.0.8 zlib/1.2.13 brotli/1.0.9 zstd/1.5.2 libidn2/2.3.4 libpsl/0.21.2 (+libidn2/2.3.4) libssh2/1.10.0 nghttp2/1.52.0
 ```
+
+Unfortunately, the changes between the individual Tesseract versions do not make a consistent testing easy. There exist some [tests](https://github.com/larswaechter/schlaumeier/blob/main/tests.py), but most of them are currently commented out, because the texts are not recognized as expected on some systems, like in the GitHub Actions pipeline for example.
 
 ## 🖥️ Setup
 
@@ -108,15 +110,15 @@ SLICE_ANSW_D=1825:2135-565:1015
 
 **TIP**: You can find them easily by enabling [Pointer Location](https://developer.android.com/studio/debug/dev-options#input) in your phone's developer options.
 
-Assuming the following screenshot:
+Assuming the following scenario:
 
 <img src="./examples/screen.jpg" height="600">
 
-In this example, the pixel slice for answer A ranges vertically from `1465` to `1775` and horizontally from `65` to `515`. So the cropped image for answer A looks like this:
+In this example, the pixel slice for answer A ranges vertically from `y_1=1465` to `y_2=1775` and horizontally from `x_1=65` to `x_2=515`. So the image for answer A, cropped based on these coordinates, looks like this:
 
 <img src="./examples/answ_A.jpg" height="150">
 
-The green rectangle marks the text in the image. Make sure that there's no border left when cropping the image. Otherwise, you might get some problems when recognizing the text snippets. See more examples [here](https://github.com/larswaechter/quizmaster/tree/main/examples).
+The green rectangle marks the text on the image recognized by Terrasect. Make sure that there's no border left when cropping the image. Otherwise, you might get some problems when recognizing the text snippets. See more examples [here](https://github.com/larswaechter/quizmaster/tree/main/examples).
 
 For the next steps, make sure your phone is **connected via USB**. You have to allow the USB debugging connection on your phone when running the script for the first time. You can run _schlaumeier_ either with Docker or natively.
 
@@ -160,7 +162,7 @@ Alternatively, you can also run `main.py` directly.
 
 The script starts the ADB server and waits for a device to be connected. As decribed above, _schlaumeier_ takes a screenshot, extracts each text part and forwards the question to ChatGPT. During execution, you'll see some helpful console output. Moreover, the screenshots are saved to the [`screenshots`](https://github.com/larswaechter/schlaumeier/tree/main/screenshots) directory. They are deleted before each run.
 
-The answer is automatically entered by the script using a touch event. Afterwards, you can press any key to continue. In this case, another touch is simulated to go to the next question and the procedure is repeated. Press `Ctrl+c` to stop the script at any time.
+The answer is automatically entered by the script using a touch event. Afterwards, you can press any key to continue and the procedure is repeated. Press `Ctrl+c` to stop the script at any time.
 
 ## 🔑 License
 
