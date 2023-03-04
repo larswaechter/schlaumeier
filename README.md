@@ -42,7 +42,7 @@ The given answer `B` is then processed in the following steps.
 
 At the moment, the agent does not work completely autonomously. There's still some interaction of the user required. However, this depends on the game and can be changed according to personal preferences. Especially ads might interrupt the game flow. The Android Debug Bridge (ADB) is being used to trigger touch events and more on your phone.
 
-Feel free to create a [fork](https://github.com/larswaechter/schlaumeier/fork) and develop a version for your prefered game!
+Feel free to create a [fork](https://github.com/larswaechter/schlaumeier/fork) and develop a version for your preferred game!
 
 ## 📝 Requirements
 
@@ -163,6 +163,14 @@ Alternatively, you can also run `main.py` directly.
 The script starts the ADB server and waits for a device to be connected. As decribed above, _schlaumeier_ takes a screenshot, extracts each text part and forwards the question to ChatGPT. During execution, you'll see some helpful console output. Moreover, the screenshots are saved to the [`screenshots`](https://github.com/larswaechter/schlaumeier/tree/main/screenshots) directory. They are deleted before each run.
 
 The answer is automatically entered by the script using a touch event. Afterwards, you can press any key to continue and the procedure is repeated. Press `Ctrl+c` to stop the script at any time.
+
+## 🎮 Support
+
+_schlaumeier_ has been successfully tested for the following Android games:
+
+- [QuizDuel](https://play.google.com/store/apps/details?id=se.maginteractive.quizduel2&hl=en&gl=US)
+- [Quiz Planet](https://play.google.com/store/apps/details?id=com.lotum.quizplanet&hl=en&gl=US)
+- [General Knowledge Quiz](https://play.google.com/store/apps/details?id=com.timleg.quiz&hl=en&gl=US)
 
 ## 🔑 License
 

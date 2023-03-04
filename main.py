@@ -1,6 +1,7 @@
 import os
 import cv2
 import openai
+import random
 from time import sleep
 from dotenv import load_dotenv
 from ppadb.client import Client
@@ -117,7 +118,9 @@ if __name__ == '__main__':
         'D': calc_slice_center(SLICES[4])
     }
 
-    input('❓ Open a question and and press any key to start...')
+    TOUCH_RANDOMNESS = int(os.getenv('TOUCH_RANDOMNESS'))
+
+    input('❓ Open a question and and press <Enter> to start...')
 
     while (True):
 
@@ -169,10 +172,12 @@ if __name__ == '__main__':
 
         print('\n👆 Entering answer: {}'.format(answer))
         [x, y] = ANSWERS_CENTER.get(answer)
-        device.input_tap(x, y)
 
-        input('\nPress any key to continue...')
+        # Adding randomness
+        rnd = random.randint(-TOUCH_RANDOMNESS, TOUCH_RANDOMNESS)
+        device.input_tap(x + rnd, y + rnd)
 
-        # Continue to next question
+        input('\nPress <Enter> to continue...')
+
         # device.input_tap(dWidth / 2, dHeight / 2)
         # sleep(1.5)
