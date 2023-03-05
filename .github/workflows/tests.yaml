@@ -1,5 +1,10 @@
 name: Tests
 
+# Might be useful later...
+# sudo apt-get update
+# sudo add-apt-repository ppa:alex-p/tesseract-ocr5
+# sudo apt-get install -y tesseract-ocr tesseract-ocr-eng
+
 on:
   push:
     branches: [main]
@@ -21,9 +26,6 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: Install dependencies
         run: |
-#         sudo apt-get update
-#         sudo add-apt-repository ppa:alex-p/tesseract-ocr5
-#         sudo apt-get install -y tesseract-ocr tesseract-ocr-eng
           python -m pip install --upgrade pip
           pip install -r requirements.txt
       - name: Test with unittest
