@@ -2,6 +2,7 @@ import os
 import cv2
 import openai
 import random
+from string import ascii_uppercase
 from time import sleep
 from dotenv import load_dotenv
 from ppadb.client import Client
@@ -23,27 +24,27 @@ def wait_for_device():
     return devices[0]
 
 
+def delete_screenshots():
+    """Deletes all images in the 'screenshots' directory."""
+    dir = './screenshots'
+    for f in os.listdir(dir):
+        if f != ".gitkeep":
+            os.remove(os.path.join(dir, f))
+
+
 def parse_slice_dimensions(dim):
     """Parses the given slice dimenions to a 2D array and returns it."""
     return [[int(x[0]), int(x[1])] for x in (wh.split(":") for wh in dim.split("-"))]
 
 
-def calc_slice_center(_slice):
+def calc_slice_center(s):
     """Calculates the center coordinates (x|y) of the given slice and returns it."""
-    return [(_slice[1][0] + _slice[1][1]) / 2, (_slice[0][0] + _slice[0][1]) / 2]
-
-
-def parse_slices(slices):
-    """Parses the given slices."""
-    return [parse_slice_dimensions(_slice) for _slice in slices]
+    return [(s[1][0] + s[1][1]) / 2, (s[0][0] + s[0][1]) / 2]
 
 
 def extract_texts(img, slices, lang):
     """Extracts the texts in the given image slices and returns them."""
-    images = []
-    for _slice in slices:
-        images.append(img[_slice[0][0]:_slice[0][1],
-                      _slice[1][0]:_slice[1][1]])
+    images = [img[s[0][0]:s[0][1], s[1][0]:s[1][1]] for s in slices]
 
     texts = []
     for idx, img in enumerate(images):
@@ -89,7 +90,7 @@ def prompt_chatgpt(question, gpt_key):
     """Prompts a question to the ChatGPT API and returns the answer."""
     openai.api_key = gpt_key
     completions = openai.ChatCompletion.create(
-        model='gpt-3.5-turbo',
+        model=os.getenv('GPT_MODEL'),
         messages=[{'role': 'user', 'content': question}]
     )
 
@@ -102,21 +103,18 @@ if __name__ == '__main__':
     # ADB setup
     device = wait_for_device()
 
-    # Text area slices [[hFrom, hTo], [wFrom, wTo]]
-    SLICES = parse_slices([
-        os.getenv('SLICE_Q'),
-        os.getenv('SLICE_ANSW_A'),
-        os.getenv('SLICE_ANSW_B'),
-        os.getenv('SLICE_ANSW_C'),
-        os.getenv('SLICE_ANSW_D')
-    ])
+    # Build slices & calculate answer center coordinates
+    ANSWERS_CENTER = {}
+    SLICES = [parse_slice_dimensions(os.getenv('SLICE_Q'))]
 
-    ANSWERS_CENTER = {
-        'A': calc_slice_center(SLICES[1]),
-        'B': calc_slice_center(SLICES[2]),
-        'C': calc_slice_center(SLICES[3]),
-        'D': calc_slice_center(SLICES[4])
-    }
+    for char in ascii_uppercase:
+        if os.getenv('SLICE_ANSW_' + char) is None:
+            break
+
+        s = parse_slice_dimensions(os.getenv('SLICE_ANSW_' + char))
+
+        SLICES.append(s)
+        ANSWERS_CENTER[char] = calc_slice_center(s)
 
     TOUCH_RANDOMNESS = int(os.getenv('TOUCH_RANDOMNESS'))
 
@@ -126,11 +124,7 @@ if __name__ == '__main__':
 
         print('\n----------------------------------')
 
-        # Delete screenshots
-        dir = './screenshots'
-        for f in os.listdir(dir):
-            if f != ".gitkeep":
-                os.remove(os.path.join(dir, f))
+        delete_screenshots()
 
         print('\n📸 Taking screenshot...')
         screenshot = device.screencap()
@@ -139,25 +133,22 @@ if __name__ == '__main__':
             f.write(screenshot)
 
         src = cv2.imread('./screenshots/screen.jpg')
-        # cv2.imwrite('croppy.jpg', src[500:1400, :])
-
-        [dHeight, dWidth, _] = src.shape
 
         print('\n📋 Extracting texts...')
         texts = extract_texts(src, SLICES, os.getenv('TESSERACT_LANG'))
         print(texts)
 
-        if (not len(texts) == 5):
-            print('😟 Could not recognize texts')
+        if (len(texts) != len(SLICES)):
+            print('😟 Could not recognize all texts!')
             answer = input('Enter alternative answer: ').upper()
         else:
             # Build question string with possible answers
             question = texts[0]
-            question += ' A: ' + texts[1]
-            question += '? B: ' + texts[2]
-            question += '? C: ' + texts[3]
-            question += '? D: ' + texts[4]
-            question += '? A, B, C or D?'
+
+            for i, answ in enumerate(texts[1:]):
+                question += " {}: {}?".format(ascii_uppercase[i], answ)
+
+            question += " " + ", ".join(ANSWERS_CENTER.keys()) + "?"
 
             # Ask ChatGPT
             print('\n🧠 Asking ChatGPT...')
@@ -167,7 +158,7 @@ if __name__ == '__main__':
             answer = message[0]
 
             if (not answer in ANSWERS_CENTER):
-                print('😟 No definite answer found')
+                print('😟 No definite answer found!')
                 answer = input('Enter alternative answer: ').upper()
 
         print('\n👆 Entering answer: {}'.format(answer))
@@ -178,6 +169,3 @@ if __name__ == '__main__':
         device.input_tap(x + rnd, y + rnd)
 
         input('\nPress <Enter> to continue...')
-
-        # device.input_tap(dWidth / 2, dHeight / 2)
-        # sleep(1.5)

@@ -2,7 +2,7 @@ import cv2
 import unittest
 from collections import namedtuple
 
-from main import calc_slice_center, parse_slices, extract_texts
+from main import calc_slice_center, parse_slice_dimensions, extract_texts
 
 # Devices Screen Slices
 SLICES = namedtuple('Device', [
@@ -16,14 +16,14 @@ class TestExtract(unittest.TestCase):
         self.assertEqual(calc_slice_center(
             [[200, 400], [700, 1000]]), [850.0, 300.0])
 
-    def test_build_slices(self):
-        slices = parse_slices([
+    def test_parse_slice_dimensions(self):
+        slices = [parse_slice_dimensions(s) for s in [
             SLICES_G1.SLICE_Q,
             SLICES_G1.SLICE_ANSW_A,
             SLICES_G1.SLICE_ANSW_B,
             SLICES_G1.SLICE_ANSW_C,
             SLICES_G1.SLICE_ANSW_D
-        ])
+        ]]
 
         self.assertEqual(len(slices), 5)
         self.assertEqual(len(slices[0]), 2)

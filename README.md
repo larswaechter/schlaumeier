@@ -2,7 +2,9 @@
 
 [![Tests](https://github.com/larswaechter/schlaumeier/actions/workflows/tests.yaml/badge.svg)](https://github.com/larswaechter/schlaumeier/actions/workflows/tests.yaml)
 
-_schlaumeier_ is a bot written in Python that allows you to automatically solve Android quiz games like [QuizDuel](https://play.google.com/store/apps/details?id=se.maginteractive.quizduel2&hl=en&gl=US), [Quiz Planet](https://play.google.com/store/apps/details?id=com.lotum.quizplanet&hl=en&gl=US) or [General Knowledge Quiz](https://play.google.com/store/apps/details?id=com.timleg.quiz&hl=en&gl=US) using [ADB](https://developer.android.com/studio/command-line/adb), [OpenCV](https://opencv.org/) and OpenAI's [ChatGPT API](https://openai.com/blog/gpt-3-apps). In my case, I have tested it for solving questions from the games _Quiz Planet_ and _General Knowledge Quiz_ but other ones should work as well with some adjustments. The script works by creating a screenshot, extracting the question and passing it to ChatGPT. See below for more details on how it works.
+_schlaumeier_ is a bot written in Python that allows you to automatically solve Android quiz games like [QuizDuel](https://play.google.com/store/apps/details?id=se.maginteractive.quizduel2&hl=en&gl=US), [Quiz Planet](https://play.google.com/store/apps/details?id=com.lotum.quizplanet&hl=en&gl=US) or [General Knowledge Quiz](https://play.google.com/store/apps/details?id=com.timleg.quiz&hl=en&gl=US) using [ADB](https://developer.android.com/studio/command-line/adb), [OpenCV](https://opencv.org/) and OpenAI's [ChatGPT API](https://openai.com/blog/gpt-3-apps). In my case, I have tested it for solving questions from the games mentioned above but other ones should work as well with some adjustments. In general, it should work for any quiz game that consists of a question and multiple solutions to choose from. At the end of this README, you'll find a list of supported games that were successfully tested.
+
+Simply put, the script operates by creating a screenshot, extracting the question / answers and passing them to ChatGPT. The answer will be then entered on your device using the Android Debug Bridge (ADB). See below for more details on how it works.
 
 Note that since ChatGPT isn't perfect and has limited knowledge, the answers given **are not always correct** too. Moreover, the API response times and its request limit might play a role depending on the game. For predicting the answer to a question, OpenAI's [`gpt-3.5-turbo`](https://platform.openai.com/docs/models/gpt-3-5) model is used.
 
@@ -12,7 +14,7 @@ This software was written for research purposes only and should not be used to g
 
 ![Demo](./examples/demo.gif)
 
-_schlaumeier_ makes use of two technologies: [optical character recognition
+_schlaumeier_ makes use of two technologies among other things: [optical character recognition
 ](https://en.wikipedia.org/wiki/Optical_character_recognition) (OCR) and [large language models](https://blogs.nvidia.com/blog/2023/01/26/what-are-large-language-models-used-for/#:~:text=A%20large%20language%20model%2C%20or,successful%20applications%20of%20transformer%20models.) (LLMs). The core idea behind it, is actually quite simple:
 
 1. Take a screenshot of the app using ADB
@@ -29,7 +31,7 @@ _schlaumeier_ makes use of two technologies: [optical character recognition
 A question prompted to ChatGPT might looks like this for example:
 
 ```
-In which European capital can you find the fine arts museums known as the "Petit Palais” and the "Grand Palais"? A: London? B: Paris? C: Madrid? D: Berlin? A, B, C or D?
+In which European capital can you find the fine arts museums known as the "Petit Palais” and the "Grand Palais"? A: London? B: Paris? C: Madrid? D: Berlin? A, B, C, D?
 ```
 
 As you can see, the possible solutions are provided at the end of the question. ChatGPT's answer:
@@ -40,7 +42,7 @@ B: Paris
 
 The given answer `B` is then processed in the following steps.
 
-At the moment, the agent does not work completely autonomously. There's still some interaction of the user required. However, this depends on the game and can be changed according to personal preferences. Especially ads might interrupt the game flow. The Android Debug Bridge (ADB) is being used to trigger touch events and more on your phone.
+At the moment, the agent does not work completely autonomously. There's still some interaction of the user required. However, this depends for the most past on the game and can be changed according to personal preferences. Especially irregular ad popups can interrupt the game flow. The ADB `shell input tap x y` command is being used to trigger touch events on your phone and taking screenshots.
 
 Feel free to create a [fork](https://github.com/larswaechter/schlaumeier/fork) and develop a version for your preferred game!
 
@@ -98,7 +100,7 @@ Enter the language for Tesseract. This should match the language of your Android
 TESSERACT_LANG=YOUR_LANG
 ```
 
-Next, enter the screen slices for the question and answers A-D. They depend on your phone's display. The slices are later used to crop the screenshot in smaller images and to extract the text in each of them.
+Next, enter the screen slices for the question and possible answers, which depend on your phone's display. The slices are later used to crop the screenshot in smaller images and to extract the text in each of them.
 
 The values (pixels) are encoded as `heightFrom:heightTo-widthFrom:widthTo`.
 
@@ -110,7 +112,9 @@ SLICE_ANSW_C=1825:2135-65:515
 SLICE_ANSW_D=1825:2135-565:1015
 ```
 
-**TIP**: You can find them easily by enabling [Pointer Location](https://developer.android.com/studio/debug/dev-options#input) in your phone's developer options.
+If your game has more than 4 answers (A-D) you can simply provide more (or less) by adding more environment variables like `SLICE_ANSW_E`, `SLICE_ANSW_F` and so on until maximum `Z`.
+
+**TIP**: You can find them easily by enabling [Pointer Location](https://developer.android.com/studio/debug/dev-options#input) in your phone's developer options. Moreover, use the [`cropper.py`](https://github.com/larswaechter/schlaumeier/blob/main/cropper.py) script to crop your screenshot and to inspect the croppped images.
 
 Assuming the following scenario:
 
