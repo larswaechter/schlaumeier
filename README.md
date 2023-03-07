@@ -23,7 +23,7 @@ _schlaumeier_ makes use of two technologies among other things: [optical charact
    - Answer A-D
 3. Extract the text in each area using OpenCV
 4. Send the question to the ChatGPT API
-   - Including the possible answers
+   - Including all possible answers
 5. Extract the model's answer
 6. "Touch" the answer on your phone using ADB
 7. Repeat the procedure for each question
@@ -42,7 +42,7 @@ B: Paris
 
 The given answer `B` is then processed in the following steps.
 
-At the moment, the agent does not work completely autonomously. There's still some interaction of the user required. However, this depends for the most past on the game and can be changed according to personal preferences. Especially irregular ad popups can interrupt the game flow. The ADB `shell input tap x y` command is being used to trigger touch events on your phone and taking screenshots.
+For now, the agent does not work completely autonomously. There's still some interaction of the user required. However, this depends for the most past on the game and can be changed according to personal preferences. Especially irregular ad popups can interrupt the game flow. The ADB `shell input tap x y` command is being used to trigger touch events on your phone.
 
 Feel free to create a [fork](https://github.com/larswaechter/schlaumeier/fork) and develop a version for your preferred game!
 
@@ -100,9 +100,9 @@ Enter the language for Tesseract. This should match the language of your Android
 TESSERACT_LANG=YOUR_LANG
 ```
 
-Next, enter the screen slices for the question and possible answers, which depend on your phone's display. The slices are later used to crop the screenshot in smaller images and to extract the text in each of them.
+Next, enter the screen slices for the question its possible answers, which depend on your phone's display. The slices are later used to crop the screenshot in smaller square images and extract the text in each of them.
 
-The values (pixels) are encoded as `heightFrom:heightTo-widthFrom:widthTo`.
+The values (coordinates) are encoded as `heightFrom:heightTo-widthFrom:widthTo`.
 
 ```
 SLICE_Q=700:1400-0:1080
@@ -114,17 +114,17 @@ SLICE_ANSW_D=1825:2135-565:1015
 
 If your game has more than 4 answers (A-D) you can simply provide more (or less) by adding more environment variables like `SLICE_ANSW_E`, `SLICE_ANSW_F` and so on until maximum `Z`.
 
-**TIP**: You can find them easily by enabling [Pointer Location](https://developer.android.com/studio/debug/dev-options#input) in your phone's developer options. Moreover, use the [`cropper.py`](https://github.com/larswaechter/schlaumeier/blob/main/cropper.py) script to crop your screenshot and to inspect the croppped images.
+**TIP**: You can find the coordinates easily by enabling [Pointer Location](https://developer.android.com/studio/debug/dev-options#input) in your phone's developer options. Moreover, use the [`cropper.py`](https://github.com/larswaechter/schlaumeier/blob/main/cropper.py) script to crop your screenshot and to inspect the croppped images.
 
 Assuming the following scenario:
 
 <img src="./examples/screen.jpg" height="600">
 
-In this example, the pixel slice for answer A ranges vertically from `y_1=1465` to `y_2=1775` and horizontally from `x_1=65` to `x_2=515`. So the image for answer A, cropped based on these coordinates, looks like this:
+In this example, the slice for answer A ranges vertically from `y_1=1465` to `y_2=1775` and horizontally from `x_1=65` to `x_2=515`. So the image for answer A, cropped based on these coordinates, looks like this:
 
 <img src="./examples/answ_A.jpg" height="150">
 
-The green rectangle marks the text on the image recognized by Terrasect. Make sure that there's no border left when cropping the image. Otherwise, you might get some problems when recognizing the text snippets. See more examples [here](https://github.com/larswaechter/quizmaster/tree/main/examples).
+The green rectangle marks the text on the image recognized by Terrasect. Make sure that there's **no border left** when cropping the image. Otherwise, you might get some problems when recognizing the text snippets. See more examples [here](https://github.com/larswaechter/quizmaster/tree/main/examples).
 
 For the next steps, make sure your phone is **connected via USB**. You have to allow the USB debugging connection on your phone when running the script for the first time. You can run _schlaumeier_ either with Docker or natively.
 

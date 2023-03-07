@@ -78,6 +78,8 @@ def extract_texts(img, slices, lang):
             # Using tesseract on the cropped image area to get text
             text = pytesseract.image_to_string(
                 cropped, lang=lang)
+
+            # Clean text
             text = text.replace("\n", " ").replace("  ", " ").strip()
 
             if (len(text)):
