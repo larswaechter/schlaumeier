@@ -1,6 +1,6 @@
-Feel free to contribute to schlaumeier🧙‍♂️:
+Feel free to contribute to 🧙‍♂️ schlaumeier:
 
-1. Create a fork
+1. Create a [fork](https://github.com/larswaechter/schlaumeier/fork)
 2. Create a new branch
 3. Make your changes
 4. Run tests: `python ./tests.py`
