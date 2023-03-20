@@ -1,4 +1,4 @@
-Feel free to contribute to 🧙‍♂️ schlaumeier:
+Feel free to contribute to schlaumeier🧙‍♂️
 
 1. Create a [fork](https://github.com/larswaechter/schlaumeier/fork)
 2. Create a new branch

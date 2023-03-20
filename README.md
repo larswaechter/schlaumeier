@@ -122,7 +122,7 @@ Assuming the following scenario:
 
 In this example, the slice for correct answer (C) ranges vertically from `y_1=1630` to `y_2=1870` and horizontally from `x_1=50` to `x_2=1020`. So the image for answer C, cropped based on these coordinates, looks like this:
 
-<img src="./examples/answ_C.jpg" height="70">
+<img src="./examples/answ_C.jpg" height="60">
 
 The lightgreen rectangle marks the text on the image recognized by Terrasect. Make sure that there's **no border left** when cropping the image. Otherwise, you might get some problems when recognizing the text snippets. See more examples [here](https://github.com/larswaechter/quizmaster/tree/main/examples).
 
