@@ -31,13 +31,13 @@ _schlaumeier_ makes use of two technologies among other things: [optical charact
 A question prompted to ChatGPT might looks like this for example:
 
 ```
-In which European capital can you find the fine arts museums known as the "Petit Palais” and the "Grand Palais"? A: London? B: Paris? C: Madrid? D: Berlin? A, B, C, D?
+Which musical instrument originates from Africa? A: Sitar? B: Marimba? C: Castanet? D: Bassoon? A, B, C, D?
 ```
 
 As you can see, the possible solutions are provided at the end of the question. ChatGPT's answer:
 
 ```
-B: Paris
+B: Marimba
 ```
 
 The given answer `B` is then processed in the following steps.
@@ -105,11 +105,11 @@ Next, enter the screen slices for the question its possible answers, which depen
 The values (coordinates) are encoded as `heightFrom:heightTo-widthFrom:widthTo`.
 
 ```
-SLICE_Q=700:1400-0:1080
-SLICE_ANSW_A=1465:1775-65:515
-SLICE_ANSW_B=1465:1775-565:1015
-SLICE_ANSW_C=1825:2135-65:515
-SLICE_ANSW_D=1825:2135-565:1015
+SLICE_Q=300:1000-0:1080
+SLICE_ANSW_A=1040:1280-50:1020
+SLICE_ANSW_B=1335:1575-50:1020
+SLICE_ANSW_C=1630:1870-50:1020
+SLICE_ANSW_D=1925:2165-50:1020
 ```
 
 If your game has more than 4 answers (A-D) you can simply provide more (or less) by adding more environment variables like `SLICE_ANSW_E`, `SLICE_ANSW_F` and so on until maximum `Z`.
@@ -118,13 +118,13 @@ If your game has more than 4 answers (A-D) you can simply provide more (or less)
 
 Assuming the following scenario:
 
-<img src="./examples/screen.jpg" height="600">
+<img src="./examples/screen.jpg" height="500">
 
-In this example, the slice for answer A ranges vertically from `y_1=1465` to `y_2=1775` and horizontally from `x_1=65` to `x_2=515`. So the image for answer A, cropped based on these coordinates, looks like this:
+In this example, the slice for correct answer (C) ranges vertically from `y_1=1630` to `y_2=1870` and horizontally from `x_1=50` to `x_2=1020`. So the image for answer C, cropped based on these coordinates, looks like this:
 
-<img src="./examples/answ_A.jpg" height="150">
+<img src="./examples/answ_C.jpg" height="70">
 
-The green rectangle marks the text on the image recognized by Terrasect. Make sure that there's **no border left** when cropping the image. Otherwise, you might get some problems when recognizing the text snippets. See more examples [here](https://github.com/larswaechter/quizmaster/tree/main/examples).
+The lightgreen rectangle marks the text on the image recognized by Terrasect. Make sure that there's **no border left** when cropping the image. Otherwise, you might get some problems when recognizing the text snippets. See more examples [here](https://github.com/larswaechter/quizmaster/tree/main/examples).
 
 For the next steps, make sure your phone is **connected via USB**. You have to allow the USB debugging connection on your phone when running the script for the first time. You can run _schlaumeier_ either with Docker or natively.
 
