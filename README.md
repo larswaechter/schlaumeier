@@ -4,9 +4,9 @@
 
 _schlaumeier_ is a bot written in Python that allows you to automatically solve Android quiz games like [QuizDuel](https://play.google.com/store/apps/details?id=se.maginteractive.quizduel2&hl=en&gl=US), [Quiz Planet](https://play.google.com/store/apps/details?id=com.lotum.quizplanet&hl=en&gl=US) or [General Knowledge Quiz](https://play.google.com/store/apps/details?id=com.timleg.quiz&hl=en&gl=US) using [ADB](https://developer.android.com/studio/command-line/adb), [OpenCV](https://opencv.org/) and OpenAI's [ChatGPT API](https://openai.com/blog/gpt-3-apps). In my case, I have tested it for solving questions from the games mentioned above but other ones should work as well with some adjustments. In general, it should work for any quiz game that consists of a question and multiple solutions to choose from. At the end of this README, you'll find a list of supported games that were successfully tested.
 
-Simply put, the script operates by creating a screenshot, extracting the question / answers and passing them to ChatGPT. The answer will be then entered on your device using the Android Debug Bridge (ADB). See below for more details on how it works.
+Simply put, the script operates by creating a screenshot, extracting the question / answers and passing them to ChatGPT, Claude or a local model. Alternatively, the screenshot can be passed directly to a vision model. The answer will be then entered on your device using the Android Debug Bridge (ADB). See below for more details on how it works.
 
-Note that since ChatGPT isn't perfect and has limited knowledge, the answers given **are not always correct** too. Moreover, the API response times and its request limit might play a role depending on the game. For predicting the answer to a question, OpenAI's [`gpt-3.5-turbo`](https://platform.openai.com/docs/models/gpt-3-5) model is used.
+Note that since ChatGPT isn't perfect and has limited knowledge, the answers given **are not always correct** too. Moreover, the API response times and its request limit might play a role depending on the game. For predicting the answer to a question, OpenAI's `gpt-5.6-terra` model is used by default. You can use another one by changing `GPT_MODEL` in your `.env` file.
 
 This software was written for research purposes only and should not be used to gain an unfair advantage in any game. Most games **prohibit** the use of such tools. Always remember: **play fair** and respect the game♎.
 
@@ -31,13 +31,17 @@ _schlaumeier_ makes use of two technologies among other things: [optical charact
 A question prompted to ChatGPT might looks like this for example:
 
 ```
-Which musical instrument originates from Africa? A: Sitar? B: Marimba? C: Castanet? D: Bassoon? A, B, C, D?
-```
-
-As you can see, the possible solutions are provided at the end of the question. ChatGPT's answer:
-
-```
+Which musical instrument originates from Africa?
+A: Sitar
 B: Marimba
+C: Castanet
+D: Bassoon
+```
+
+As you can see, the possible solutions are provided at the end of the question. ChatGPT is instructed to reply with the letter of the correct answer only:
+
+```
+B
 ```
 
 The given answer `B` is then processed in the following steps.
@@ -53,12 +57,12 @@ The following software/hardware is required:
 - Android Smartphone (or emulator)
   - Root is **not** required
   - [USB-Debugging](https://developer.android.com/studio/debug/dev-options#Enable-debugging) enabled
-- [ChatGPT API Key](https://devopsforu.com/how-to-connect-to-chat-gpt-api/)
+- An LLM: [ChatGPT API Key](https://devopsforu.com/how-to-connect-to-chat-gpt-api/), [Claude API Key](https://platform.claude.com/), [Ollama](https://ollama.com/) or any OpenAI compatible API
 - Docker Setup
   - [Docker](https://www.docker.com/)
 - Native Setup
-  - [Python](https://www.python.org/)
-  - [Tesseract](https://github.com/tesseract-ocr/tesseract)
+  - [Python](https://www.python.org/) 3.12 or newer
+  - [Tesseract](https://github.com/tesseract-ocr/tesseract) (not required for `SCREEN_READER=vision`, except for `cropper.py`)
   - [ADB-Tools](https://developer.android.com/studio/command-line/adb)
 
 Especially the Tesseract version, that is used to recognize texts on images, plays a major role. I've tested the following one, which works quite well for the English language:
@@ -78,7 +82,7 @@ tesseract 5.3.0
 
 I noticed some rare cases, when Tesseract was not able to identify the text. That was when a text contained only a single letter or number. However, most of the time it works.
 
-Unfortunately, the changes between the individual Tesseract versions do not make a consistent testing easy. There exist some [tests](https://github.com/larswaechter/schlaumeier/blob/main/tests.py), but most of them are currently commented out, because the texts are not recognized as expected on some systems, like in the GitHub Actions pipeline for example.
+Unfortunately, the changes between the individual Tesseract versions do not make a consistent testing easy. That's why the [tests](https://github.com/larswaechter/schlaumeier/blob/main/tests.py) of the image pipeline use a fake OCR. Only the tests on real screenshots require Tesseract: they tolerate small differences in the recognized texts and are skipped if it's not installed.
 
 ## 🖥️ Setup
 
@@ -88,7 +92,7 @@ First of all, create a new environment file:
 cp .env.example .env
 ```
 
-Enter your ChatGPT API KEY:
+Enter your ChatGPT API KEY (or see [LLM provider](#llm-provider) for using a local model instead):
 
 ```
 GPT_KEY=YOUR_KEY
@@ -112,9 +116,9 @@ SLICE_ANSW_C=1630:1870-50:1020
 SLICE_ANSW_D=1925:2165-50:1020
 ```
 
-If your game has more than 4 answers (A-D) you can simply provide more (or less) by adding more environment variables like `SLICE_ANSW_E`, `SLICE_ANSW_F` and so on until maximum `Z`.
+If your game has more than 4 answers (A-D) you can simply provide more (or less) by adding more environment variables like `SLICE_ANSW_E`, `SLICE_ANSW_F` and so on until maximum `Z`. The letters have to be consecutive.
 
-**TIP**: You can find the coordinates easily by enabling [Pointer Location](https://developer.android.com/studio/debug/dev-options#input) in your phone's developer options. Moreover, use the [`cropper.py`](https://github.com/larswaechter/schlaumeier/blob/main/cropper.py) script to crop your screenshot and to inspect the croppped images.
+**TIP**: You can find the coordinates easily by enabling [Pointer Location](https://developer.android.com/studio/debug/dev-options#input) in your phone's developer options. Moreover, use the [`cropper.py`](https://github.com/larswaechter/schlaumeier/blob/main/cropper.py) script to crop your screenshot and to inspect the cropped images.
 
 Assuming the following scenario:
 
@@ -124,9 +128,58 @@ In this example, the slice for correct answer (C) ranges vertically from `y_1=16
 
 <img src="./examples/answ_C.jpg" height="60">
 
-The lightgreen rectangle marks the text on the image recognized by Terrasect. Make sure that there's **no border left** when cropping the image. Otherwise, you might get some problems when recognizing the text snippets. See more examples [here](https://github.com/larswaechter/quizmaster/tree/main/examples).
+The lightgreen rectangle marks the text on the image recognized by Tesseract. Make sure that there's **no border left** when cropping the image. Otherwise, you might get some problems when recognizing the text snippets. See more examples [here](https://github.com/larswaechter/schlaumeier/tree/main/examples).
 
 For the next steps, make sure your phone is **connected via USB**. You have to allow the USB debugging connection on your phone when running the script for the first time. You can run _schlaumeier_ either with Docker or natively.
+
+### LLM provider
+
+_schlaumeier_ can use different language models. Choose one with `LLM_PROVIDER` in your `.env` file:
+
+| `LLM_PROVIDER`     | Model                                                 | Required settings                      |
+| ------------------ | ----------------------------------------------------- | -------------------------------------- |
+| `openai` (default) | ChatGPT in the cloud                                  | `GPT_KEY`, `GPT_MODEL`                 |
+| `anthropic`        | Claude in the cloud                                   | `ANTHROPIC_API_KEY`, `ANTHROPIC_MODEL` |
+| `ollama`           | A local model using [Ollama](https://ollama.com/)     | `OLLAMA_MODEL`                         |
+| `custom`           | Anything else that provides an OpenAI compatible API  | `CUSTOM_URL`, `CUSTOM_MODEL`           |
+
+Cloud providers charge per request and receive the extracted texts or screenshots. With a local model, everything stays on your machine, but it requires enough memory to run it.
+
+To use a local model, download it and enable it in your `.env` file:
+
+```bash
+ollama pull qwen3-vl:8b
+```
+
+```
+LLM_PROVIDER=ollama
+OLLAMA_MODEL=qwen3-vl:8b
+```
+
+When running in Docker, Ollama on your host machine is reachable using `OLLAMA_URL=http://host.docker.internal:11434/v1` (Docker Desktop).
+
+To use any other OpenAI compatible API, for example a different local server, set its URL and model. `CUSTOM_KEY` is only required if the server checks it.
+
+```
+LLM_PROVIDER=custom
+CUSTOM_URL=http://localhost:1234/v1
+CUSTOM_MODEL=YOUR_MODEL
+CUSTOM_KEY=YOUR_KEY
+```
+
+### Screen reader
+
+Independently of the provider, you can choose how the screen is read with `SCREEN_READER`:
+
+|                   | `tesseract` (default)              | `vision`                      |
+| ----------------- | ---------------------------------- | ----------------------------- |
+| Text is read by   | Tesseract                          | The LLM                       |
+| The LLM receives  | The extracted texts                | A screenshot                  |
+| Requires          | Tesseract and its language pack    | A model that supports images  |
+
+With `vision`, the screenshot is cropped to your slices and a letter is drawn on each answer. Check `screenshots/img_vision.jpg` to see what the model receives. The letter is placed in the top left corner of the slice, so make sure that it doesn't cover the answer. The slices are still required: they tell _schlaumeier_ where to touch the screen.
+
+In a small test on an Apple M4 with 16 GB of memory, `qwen3-vl:8b` took about 20 seconds per question using `vision` (17-28 seconds, the first one takes longer because the model has to be loaded), which might be too slow for games with a short time limit.
 
 ### Docker
 
@@ -166,9 +219,34 @@ Last but not least run the script:
 
 Alternatively, you can also run `main.py` directly.
 
-The script starts the ADB server and waits for a device to be connected. As decribed above, _schlaumeier_ takes a screenshot, extracts each text part and forwards the question to ChatGPT. During execution, you'll see some helpful console output. Moreover, the screenshots are saved to the [`screenshots`](https://github.com/larswaechter/schlaumeier/tree/main/screenshots) directory. They are deleted before each run.
+The script starts the ADB server and waits for a device to be connected. As described above, _schlaumeier_ takes a screenshot, extracts each text part and forwards the question to ChatGPT. During execution, you'll see some helpful console output. Moreover, the screenshots are saved to the [`screenshots`](https://github.com/larswaechter/schlaumeier/tree/main/screenshots) directory. They are deleted before each run.
 
-The answer is automatically entered by the script using a touch event. Afterwards, you can press any key to continue and the procedure is repeated. Press `Ctrl+c` to stop the script at any time.
+If a text can't be recognized, the API request fails or the model gives no definite answer, you're asked to enter the answer yourself. Leave it empty to skip the question.
+
+The answer is automatically entered by the script using a touch event. Afterwards, you can press `Enter` to continue and the procedure is repeated. Press `Ctrl+c` to stop the script at any time.
+
+## 🤖 Claude Code skill
+
+Instead of running the script, you can let [Claude Code](https://claude.com/product/claude-code) play: the `/schlaumeier` skill looks at your phone, chooses an answer and taps it. No slices, API key or Tesseract are required, but your Claude Code usage applies. Screenshots are sent to Anthropic.
+
+It accesses your phone with the MCP server in [`mcp_server.py`](https://github.com/larswaechter/schlaumeier/blob/main/mcp_server.py), which only provides two tools: `get_screenshot` and `tap`. Claude can't run any other commands on your phone.
+
+Install [ADB](https://developer.android.com/studio/command-line/adb) and the dependencies into a virtual environment:
+
+```bash
+python3 -m venv .venv
+.venv/bin/pip install -r requirements.txt
+```
+
+Connect your phone, run `adb start-server`, check that it's listed by `adb devices` and start `claude` in this directory. Approve the `schlaumeier` MCP server when asked and open a question in your game:
+
+```
+/schlaumeier
+/schlaumeier 5
+/schlaumeier all
+```
+
+The first one solves the current question, the second one solves the next five and the third one keeps going without a limit. Press `Esc` to stop it at any time. Between rounds, the skill may tap buttons that are clearly free, like "Next" or "Continue". It stops at anything else, like ads, purchase dialogs, paid offers or screens it can't identify. Long runs use up your Claude Code usage quickly, so keep an eye on them. If multiple devices are connected, select one by setting `ADB_SERIAL` to its serial.
 
 ## 🎮 Support
 

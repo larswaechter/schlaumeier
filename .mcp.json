@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "schlaumeier": {
+      "command": ".venv/bin/python",
+      "args": ["mcp_server.py"]
+    }
+  }
+}

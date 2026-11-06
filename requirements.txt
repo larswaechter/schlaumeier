@@ -1,5 +1,7 @@
-openai==0.27.0
-opencv-python==4.7.0.72
-python-dotenv==1.0.0
-pytesseract==0.3.10
+anthropic==2.6.0
+openai==3.46.0
+mcp==2.3.0
+opencv-python-headless==5.0.0.93
+python-dotenv==1.2.4
+pytesseract==0.3.13
 pure-python-adb==0.3.0.dev0

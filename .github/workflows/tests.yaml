@@ -1,10 +1,5 @@
 name: Tests
 
-# Might be useful later...
-# sudo apt-get update
-# sudo add-apt-repository ppa:alex-p/tesseract-ocr5
-# sudo apt-get install -y tesseract-ocr tesseract-ocr-eng
-
 on:
   push:
     branches: [main]
@@ -16,14 +11,18 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.8", "3.9", "3.10"]
+        python-version: ["3.12", "3.13", "3.14"]
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v5
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python-version }}
+      - name: Install Tesseract
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y tesseract-ocr tesseract-ocr-eng
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip

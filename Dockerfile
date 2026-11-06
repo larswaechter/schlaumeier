@@ -1,13 +1,12 @@
-FROM python:3.9
+FROM python:3.14-slim-trixie
 
 WORKDIR /code
 
-RUN apt-get update
-RUN apt-get install -y tesseract-ocr python3-opencv android-tools-adb
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends tesseract-ocr adb \
+    && rm -rf /var/lib/apt/lists/*
 
-COPY ./main.py /code
-COPY ./run.sh /code/run.sh
-COPY ./requirements.txt /code/requirements.txt
+COPY ./main.py ./cropper.py ./run.sh ./requirements.txt /code/
 
 RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt
 

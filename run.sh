@@ -29,4 +29,4 @@ wait_for_device
 
 echo -e "\n🧙 ${bold}Running schlaumeier${normal}\n"
 
-python main.py
+python3 main.py
