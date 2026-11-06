@@ -4,7 +4,12 @@
 
 _schlaumeier_ is a bot written in Python that allows you to automatically solve Android quiz games like [QuizDuel](https://play.google.com/store/apps/details?id=se.maginteractive.quizduel2&hl=en&gl=US), [Quiz Planet](https://play.google.com/store/apps/details?id=com.lotum.quizplanet&hl=en&gl=US) or [General Knowledge Quiz](https://play.google.com/store/apps/details?id=com.timleg.quiz&hl=en&gl=US) using [ADB](https://developer.android.com/studio/command-line/adb), [OpenCV](https://opencv.org/) and OpenAI's [ChatGPT API](https://openai.com/blog/gpt-3-apps). In my case, I have tested it for solving questions from the games mentioned above but other ones should work as well with some adjustments. In general, it should work for any quiz game that consists of a question and multiple solutions to choose from. At the end of this README, you'll find a list of supported games that were successfully tested.
 
-Simply put, the script operates by creating a screenshot, extracting the question / answers and passing them to ChatGPT, Claude or a local model. Alternatively, the screenshot can be passed directly to a vision model, or [Claude Code](#-claude-code-skill) can play by itself. The answer will be then entered on your device using the Android Debug Bridge (ADB). See below for more details on how it works.
+There are two ways to use it:
+
+- 🤖 **Claude Code skill:** run `/schlaumeier` in [Claude Code](https://claude.com/product/claude-code) and Claude plays by itself. It looks at your phone, chooses the answers and taps them, at about 4 seconds per question in a test on a real phone. No API key, screen coordinates or OCR setup are required. See the [Claude Code skill](#-claude-code-skill) section to get started.
+- 🐍 **Python script:** works with ChatGPT, Claude, a local model through [Ollama](https://ollama.com/) or any OpenAI compatible API, and reads the screen using OCR or a vision model.
+
+Simply put, the script operates by creating a screenshot, extracting the question / answers and passing them to an LLM. Alternatively, the screenshot can be passed directly to a vision model. The answer will be then entered on your device using the Android Debug Bridge (ADB). See below for more details on how it works.
 
 Note that since ChatGPT isn't perfect and has limited knowledge, the answers given **are not always correct** too. Moreover, the API response times and its request limit might play a role depending on the game. For predicting the answer to a question, OpenAI's `gpt-5.6-terra` model is used by default. You can use another one by changing `GPT_MODEL` in your `.env` file.
 
