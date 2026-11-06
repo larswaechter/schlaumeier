@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="schlaumeier logo">
+  <title>schlaumeier</title>
+  <defs>
+    <linearGradient id="background" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#312e81"/>
+      <stop offset="1" stop-color="#7c3aed"/>
+    </linearGradient>
+    <linearGradient id="hat" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#fde047"/>
+      <stop offset="1" stop-color="#f59e0b"/>
+    </linearGradient>
+    <path id="sparkle" d="M0-20C2-5 5-2 20 0 5 2 2 5 0 20-2 5-5 2-20 0-5-2-2-5 0-20Z"/>
+  </defs>
+
+  <rect width="512" height="512" rx="112" fill="url(#background)"/>
+
+  <!-- Sparkles -->
+  <g fill="#fef9c3">
+    <use href="#sparkle" transform="translate(96 132) scale(1.1)"/>
+    <use href="#sparkle" transform="translate(424 116) scale(.8)"/>
+    <use href="#sparkle" transform="translate(432 322) scale(1.2)"/>
+    <use href="#sparkle" transform="translate(82 330) scale(.7)"/>
+  </g>
+
+  <!-- Phone -->
+  <rect x="154" y="184" width="204" height="296" rx="34" fill="#1e1b4b"/>
+  <rect x="168" y="198" width="176" height="268" rx="22" fill="#f5f3ff"/>
+
+  <!-- Question -->
+  <rect x="192" y="242" width="128" height="12" rx="6" fill="#a78bfa"/>
+  <rect x="212" y="264" width="88" height="12" rx="6" fill="#a78bfa"/>
+
+  <!-- Answers -->
+  <rect x="188" y="290" width="136" height="34" rx="12" fill="#ddd6fe"/>
+  <rect x="188" y="334" width="136" height="34" rx="12" fill="#22c55e"/>
+  <path d="M242 351l11 11 19-22" fill="none" stroke="#fff" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect x="188" y="378" width="136" height="34" rx="12" fill="#ddd6fe"/>
+  <rect x="188" y="422" width="136" height="34" rx="12" fill="#ddd6fe"/>
+
+  <!-- Hat -->
+  <g transform="rotate(-7 256 200)">
+    <path d="M166 204C188 150 206 96 262 58c14-10 34-14 52-2-16 2-24 10-26 22 14 40 28 86 46 126Z" fill="url(#hat)"/>
+    <path d="M314 56c8 6 12 16 8 26" fill="none" stroke="#f59e0b" stroke-width="10" stroke-linecap="round"/>
+    <ellipse cx="256" cy="212" rx="146" ry="26" fill="#fbbf24"/>
+    <ellipse cx="256" cy="207" rx="146" ry="22" fill="#fde047"/>
+    <path d="M172 188c54 16 110 16 164 0l8 16c-56 12-124 12-180 0Z" fill="#6d28d9"/>
+    <use href="#sparkle" transform="translate(262 128) scale(1.15)" fill="#6d28d9"/>
+    <circle cx="226" cy="150" r="6" fill="#6d28d9"/>
+    <circle cx="288" cy="88" r="5" fill="#6d28d9"/>
+  </g>
+</svg>

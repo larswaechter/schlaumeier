@@ -1,4 +1,6 @@
-# 🧙‍♂️ schlaumeier
+<p align="center"><img src="./assets/logo.svg" width="180" alt="schlaumeier logo"></p>
+
+# schlaumeier
 
 [![Tests](https://github.com/larswaechter/schlaumeier/actions/workflows/tests.yaml/badge.svg)](https://github.com/larswaechter/schlaumeier/actions/workflows/tests.yaml)
 
@@ -141,12 +143,12 @@ For the next steps, make sure your phone is **connected via USB**. You have to a
 
 _schlaumeier_ can use different language models. Choose one with `LLM_PROVIDER` in your `.env` file:
 
-| `LLM_PROVIDER`     | Model                                                 | Required settings                      |
-| ------------------ | ----------------------------------------------------- | -------------------------------------- |
-| `openai` (default) | ChatGPT in the cloud                                  | `GPT_KEY`, `GPT_MODEL`                 |
-| `anthropic`        | Claude in the cloud                                   | `ANTHROPIC_API_KEY`, `ANTHROPIC_MODEL` |
-| `ollama`           | A local model using [Ollama](https://ollama.com/)     | `OLLAMA_MODEL`                         |
-| `custom`           | Anything else that provides an OpenAI compatible API  | `CUSTOM_URL`, `CUSTOM_MODEL`           |
+| `LLM_PROVIDER`     | Model                                                | Required settings                      |
+| ------------------ | ---------------------------------------------------- | -------------------------------------- |
+| `openai` (default) | ChatGPT in the cloud                                 | `GPT_KEY`, `GPT_MODEL`                 |
+| `anthropic`        | Claude in the cloud                                  | `ANTHROPIC_API_KEY`, `ANTHROPIC_MODEL` |
+| `ollama`           | A local model using [Ollama](https://ollama.com/)    | `OLLAMA_MODEL`                         |
+| `custom`           | Anything else that provides an OpenAI compatible API | `CUSTOM_URL`, `CUSTOM_MODEL`           |
 
 Cloud providers charge per request and receive the extracted texts or screenshots. With a local model, everything stays on your machine, but it requires enough memory to run it.
 
@@ -176,11 +178,11 @@ CUSTOM_KEY=YOUR_KEY
 
 Independently of the provider, you can choose how the screen is read with `SCREEN_READER`:
 
-|                   | `tesseract` (default)              | `vision`                      |
-| ----------------- | ---------------------------------- | ----------------------------- |
-| Text is read by   | Tesseract                          | The LLM                       |
-| The LLM receives  | The extracted texts                | A screenshot                  |
-| Requires          | Tesseract and its language pack    | A model that supports images  |
+|                  | `tesseract` (default)           | `vision`                     |
+| ---------------- | ------------------------------- | ---------------------------- |
+| Text is read by  | Tesseract                       | The LLM                      |
+| The LLM receives | The extracted texts             | A screenshot                 |
+| Requires         | Tesseract and its language pack | A model that supports images |
 
 With `vision`, the screenshot is cropped to your slices and a letter is drawn on each answer. Check `screenshots/img_vision.jpg` to see what the model receives. The letter is placed in the top left corner of the slice, so make sure that it doesn't cover the answer. The slices are still required: they tell _schlaumeier_ where to touch the screen.
 
