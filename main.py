@@ -84,7 +84,7 @@ def check_tesseract():
     try:
         pytesseract.get_tesseract_version()
     except pytesseract.TesseractNotFoundError:
-        sys.exit("😟 Tesseract is not installed! It's required by SCREEN_READER=tesseract and cropper.py.")
+        sys.exit("😟 Tesseract is not installed! It's required by SCREEN_READER=tesseract and cropper.py --ocr.")
 
 
 def wait_for_device():
@@ -235,15 +235,20 @@ def ask_alternative_answer(letters):
         print('😟 Invalid answer! Choose from: ' + ", ".join(letters))
 
 
+def draw_label(img, char, s):
+    """Draws a letter in the top left corner of the given slice."""
+    y, x = s[0][0], s[1][0]
+    cv2.rectangle(img, (x, y), (x + 70, y + 70), (0, 0, 0), -1)
+    cv2.putText(img, char, (x + 14, y + 55), cv2.FONT_HERSHEY_SIMPLEX,
+                1.8, (255, 255, 255), 4, cv2.LINE_AA)
+
+
 def build_vision_image(img, slices, answers_center):
     """Returns the screenshot with a letter on each answer slice as base64 encoded JPEG."""
     img = img.copy()
 
     for char, s in zip(answers_center, slices[1:]):
-        y, x = s[0][0], s[1][0]
-        cv2.rectangle(img, (x, y), (x + 70, y + 70), (0, 0, 0), -1)
-        cv2.putText(img, char, (x + 14, y + 55), cv2.FONT_HERSHEY_SIMPLEX,
-                    1.8, (255, 255, 255), 4, cv2.LINE_AA)
+        draw_label(img, char, s)
 
     # Crop the image to the question and answers
     img = img[min(s[0][0] for s in slices):max(s[0][1] for s in slices),

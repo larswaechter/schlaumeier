@@ -8,6 +8,7 @@ from difflib import SequenceMatcher
 from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
 
+import cropper
 import main
 import mcp_server
 from main import build_question, calc_slice_center, extract_texts, parse_answer, parse_slice_dimensions
@@ -422,6 +423,57 @@ class TestExtract(unittest.TestCase):
         for call in mock.call_args_list:
             b, g, r = cv2.split(call.args[0])
             self.assertFalse(((g == 255) & (b == 0) & (r == 0)).any())
+
+
+class TestCropper(unittest.TestCase):
+    def setUp(self):
+        self.img = np.full((300, 200, 3), 255, np.uint8)
+        self.slices = [[[0, 100], [0, 200]], [[120, 200], [10, 190]],
+                       [[210, 290], [10, 190]]]
+
+    def test_slices_are_drawn(self):
+        img = cropper.draw_slices(self.img, self.slices)
+
+        # The bottom right corner of the last slice
+        self.assertEqual(list(img[290, 190]), [0, 255, 0])
+
+    def test_slices_are_labeled(self):
+        img = cropper.draw_slices(self.img, self.slices)
+
+        for s in self.slices:
+            self.assertLess(img[s[0][0] + 5:s[0][0] + 65,
+                                s[1][0] + 5:s[1][0] + 65].mean(), 128)
+
+    def test_labels_start_with_question(self):
+        with patch.object(cropper, 'draw_label') as draw:
+            cropper.draw_slices(self.img, self.slices)
+
+        self.assertEqual([call.args[1] for call in draw.call_args_list],
+                         ['Q', 'A', 'B'])
+
+    def test_input_image_is_not_changed(self):
+        cropper.draw_slices(self.img, self.slices)
+
+        self.assertEqual(self.img.min(), 255)
+
+    def test_valid_slices(self):
+        self.assertEqual(cropper.find_invalid_slices(self.img, self.slices), [])
+
+    def test_slices_exceeding_the_image(self):
+        slices = [self.slices[0], [[120, 301], [10, 190]],
+                  [[210, 290], [10, 201]]]
+
+        self.assertEqual(cropper.find_invalid_slices(self.img, slices),
+                         ['A', 'B'])
+
+    def test_empty_slice(self):
+        self.assertEqual(cropper.find_invalid_slices(
+            self.img, [[[100, 100], [0, 200]]]), ['Q'])
+
+    def test_slices_of_all_fixtures_are_valid(self):
+        for path, device_slices, _ in QUESTIONS:
+            self.assertEqual(cropper.find_invalid_slices(
+                cv2.imread(path), parse_slices(device_slices)), [])
 
 
 class TestMcpServer(unittest.TestCase):

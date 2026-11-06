@@ -4,7 +4,7 @@
 
 [![Tests](https://github.com/larswaechter/schlaumeier/actions/workflows/tests.yaml/badge.svg)](https://github.com/larswaechter/schlaumeier/actions/workflows/tests.yaml)
 
-_schlaumeier_ is a bot written in Python that allows you to automatically solve Android quiz games like [QuizDuel](https://play.google.com/store/apps/details?id=se.maginteractive.quizduel2&hl=en&gl=US), [Quiz Planet](https://play.google.com/store/apps/details?id=com.lotum.quizplanet&hl=en&gl=US) or [General Knowledge Quiz](https://play.google.com/store/apps/details?id=com.timleg.quiz&hl=en&gl=US) using [ADB](https://developer.android.com/studio/command-line/adb), [OpenCV](https://opencv.org/) and OpenAI's [ChatGPT API](https://openai.com/blog/gpt-3-apps). In my case, I have tested it for solving questions from the games mentioned above but other ones should work as well with some adjustments. In general, it should work for any quiz game that consists of a question and multiple solutions to choose from. At the end of this README, you'll find a list of supported games that were successfully tested.
+_schlaumeier_ is a bot written in Python that allows you to automatically solve Android quiz games like [QuizDuel](https://play.google.com/store/apps/details?id=se.maginteractive.quizduel2&hl=en&gl=US), [Quiz Planet](https://play.google.com/store/apps/details?id=com.lotum.quizplanet&hl=en&gl=US) or [General Knowledge Quiz](https://play.google.com/store/apps/details?id=com.timleg.quiz&hl=en&gl=US) using [ADB](https://developer.android.com/studio/command-line/adb), [OpenCV](https://opencv.org/) and a large language model. In my case, I have tested it for solving questions from the games mentioned above but other ones should work as well with some adjustments. In general, it should work for any quiz game that consists of a question and multiple solutions to choose from. At the end of this README, you'll find a list of supported games that were successfully tested.
 
 There are two ways to use it:
 
@@ -13,7 +13,7 @@ There are two ways to use it:
 
 Simply put, the script operates by creating a screenshot, extracting the question / answers and passing them to an LLM. Alternatively, the screenshot can be passed directly to a vision model. The answer will be then entered on your device using the Android Debug Bridge (ADB). See below for more details on how it works.
 
-Note that since ChatGPT isn't perfect and has limited knowledge, the answers given **are not always correct** too. Moreover, the API response times and its request limit might play a role depending on the game. For predicting the answer to a question, OpenAI's `gpt-5.6-terra` model is used by default. You can use another one by changing `GPT_MODEL` in your `.env` file.
+Note that since language models aren't perfect and have limited knowledge, the answers given **are not always correct** too. Moreover, the response times and request limits might play a role depending on the game. By default, the script uses OpenAI's `gpt-5.6-terra` model. You can use another model or provider by changing your `.env` file, see [LLM provider](#llm-provider).
 
 This software was written for research purposes only and should not be used to gain an unfair advantage in any game. Most games **prohibit** the use of such tools. Always remember: **play fair** and respect the game♎.
 
@@ -28,14 +28,16 @@ _schlaumeier_ makes use of two technologies among other things: [optical charact
 2. Slice the screenshot in 5 areas
    - Question
    - Answer A-D
-3. Extract the text in each area using OpenCV
-4. Send the question to the ChatGPT API
+3. Extract the text in each area using OpenCV and Tesseract
+4. Send the question to the LLM
    - Including all possible answers
 5. Extract the model's answer
 6. "Touch" the answer on your phone using ADB
 7. Repeat the procedure for each question
 
-A question prompted to ChatGPT might looks like this for example:
+With `SCREEN_READER=vision`, steps 2 to 4 are replaced by sending the screenshot itself to the LLM, see [Screen reader](#screen-reader). The Claude Code skill works without slices, see [Claude Code skill](#-claude-code-skill).
+
+A question prompted to the LLM might look like this for example:
 
 ```
 Which musical instrument originates from Africa?
@@ -45,7 +47,7 @@ C: Castanet
 D: Bassoon
 ```
 
-As you can see, the possible solutions are provided at the end of the question. ChatGPT is instructed to reply with the letter of the correct answer only:
+As you can see, the possible solutions are provided at the end of the question. The LLM is instructed to reply with the letter of the correct answer only:
 
 ```
 B
@@ -53,7 +55,7 @@ B
 
 The given answer `B` is then processed in the following steps.
 
-For now, the agent does not work completely autonomously. There's still some interaction of the user required. However, this depends for the most past on the game and can be changed according to personal preferences. Especially irregular ad popups can interrupt the game flow. The ADB `shell input tap x y` command is being used to trigger touch events on your phone.
+For now, the agent does not work completely autonomously. There's still some interaction of the user required. However, this depends for the most part on the game and can be changed according to personal preferences. Especially irregular ad popups can interrupt the game flow. The ADB `shell input tap x y` command is being used to trigger touch events on your phone.
 
 Feel free to create a [fork](https://github.com/larswaechter/schlaumeier/fork) and develop a version for your preferred game!
 
@@ -64,15 +66,19 @@ The following software/hardware is required:
 - Android Smartphone (or emulator)
   - Root is **not** required
   - [USB-Debugging](https://developer.android.com/studio/debug/dev-options#Enable-debugging) enabled
-- An LLM: [ChatGPT API Key](https://devopsforu.com/how-to-connect-to-chat-gpt-api/), [Claude API Key](https://platform.claude.com/), [Ollama](https://ollama.com/) or any OpenAI compatible API
+- For the Python script: an LLM, like a [ChatGPT API Key](https://devopsforu.com/how-to-connect-to-chat-gpt-api/), [Claude API Key](https://platform.claude.com/), [Ollama](https://ollama.com/) or any OpenAI compatible API
+- Claude Code skill
+  - [Claude Code](https://claude.com/product/claude-code)
+  - [Python](https://www.python.org/) 3.12 or newer
+  - [ADB-Tools](https://developer.android.com/studio/command-line/adb)
 - Docker Setup
   - [Docker](https://www.docker.com/)
 - Native Setup
   - [Python](https://www.python.org/) 3.12 or newer
-  - [Tesseract](https://github.com/tesseract-ocr/tesseract) (not required for `SCREEN_READER=vision`, except for `cropper.py`)
+  - [Tesseract](https://github.com/tesseract-ocr/tesseract) (not required for `SCREEN_READER=vision`)
   - [ADB-Tools](https://developer.android.com/studio/command-line/adb)
 
-Especially the Tesseract version, that is used to recognize texts on images, plays a major role. I've tested the following one, which works quite well for the English language:
+Especially the Tesseract version, that is used to recognize texts on images, plays a major role. I've tested the following one, which works quite well for the English language. The tests also pass with Tesseract 5.5.
 
 ```
 tesseract 5.3.0
@@ -105,13 +111,13 @@ Enter your ChatGPT API KEY (or see [LLM provider](#llm-provider) for using a loc
 GPT_KEY=YOUR_KEY
 ```
 
-Enter the language for Tesseract. This should match the language of your Android Game. Make sure that you have the according [language pack](https://tesseract-ocr.github.io/tessdoc/Data-Files-in-different-versions.html) installed on your system.
+If you use Tesseract, enter its language. This should match the language of your Android Game. Make sure that you have the according [language pack](https://tesseract-ocr.github.io/tessdoc/Data-Files-in-different-versions.html) installed on your system.
 
 ```
 TESSERACT_LANG=YOUR_LANG
 ```
 
-Next, enter the screen slices for the question its possible answers, which depend on your phone's display. The slices are later used to crop the screenshot in smaller square images and extract the text in each of them.
+Next, enter the screen slices for the question and its possible answers, which depend on your phone's display. The slices are later used to crop the screenshot in smaller images and extract the text in each of them.
 
 The values (coordinates) are encoded as `heightFrom:heightTo-widthFrom:widthTo`.
 
@@ -125,7 +131,15 @@ SLICE_ANSW_D=1925:2165-50:1020
 
 If your game has more than 4 answers (A-D) you can simply provide more (or less) by adding more environment variables like `SLICE_ANSW_E`, `SLICE_ANSW_F` and so on until maximum `Z`. The letters have to be consecutive.
 
-**TIP**: You can find the coordinates easily by enabling [Pointer Location](https://developer.android.com/studio/debug/dev-options#input) in your phone's developer options. Moreover, use the [`cropper.py`](https://github.com/larswaechter/schlaumeier/blob/main/cropper.py) script to crop your screenshot and to inspect the cropped images.
+**TIP**: You can find the coordinates easily by enabling [Pointer Location](https://developer.android.com/studio/debug/dev-options#input) in your phone's developer options.
+
+To check your slices, open a question on your phone and run [`cropper.py`](https://github.com/larswaechter/schlaumeier/blob/main/cropper.py). It saves a screenshot with all slices drawn on it to `screenshots/slices.jpg` and warns you about slices that don't fit your screen:
+
+```bash
+python3 cropper.py
+```
+
+With `python3 cropper.py --ocr`, it additionally prints the recognized texts and saves the cropped images to the `screenshots` directory. This requires Tesseract.
 
 Assuming the following scenario:
 
@@ -226,7 +240,7 @@ Last but not least run the script:
 
 Alternatively, you can also run `main.py` directly.
 
-The script starts the ADB server and waits for a device to be connected. As described above, _schlaumeier_ takes a screenshot, extracts each text part and forwards the question to ChatGPT. During execution, you'll see some helpful console output. Moreover, the screenshots are saved to the [`screenshots`](https://github.com/larswaechter/schlaumeier/tree/main/screenshots) directory. They are deleted before each run.
+The script starts the ADB server and waits for a device to be connected. As described above, _schlaumeier_ takes a screenshot, extracts each text part and forwards the question to the LLM. During execution, you'll see some helpful console output. Moreover, the screenshots are saved to the [`screenshots`](https://github.com/larswaechter/schlaumeier/tree/main/screenshots) directory. They are deleted before each run.
 
 If a text can't be recognized, the API request fails or the model gives no definite answer, you're asked to enter the answer yourself. Leave it empty to skip the question.
 
