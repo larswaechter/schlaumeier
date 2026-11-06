@@ -426,9 +426,10 @@ class TestExtract(unittest.TestCase):
 
 class TestMcpServer(unittest.TestCase):
     def setUp(self):
-        patcher = patch.object(mcp_server, 'last_screenshot', None)
-        patcher.start()
-        self.addCleanup(patcher.stop)
+        for name, value in [('last_screenshot', None), ('TAP_TIMEOUT', 1)]:
+            patcher = patch.object(mcp_server, name, value)
+            patcher.start()
+            self.addCleanup(patcher.stop)
 
         self.device = MagicMock()
         patcher = patch.object(mcp_server, 'get_device',
@@ -436,42 +437,56 @@ class TestMcpServer(unittest.TestCase):
         patcher.start()
         self.addCleanup(patcher.stop)
 
-    def screencap(self, width, height):
-        _, png = cv2.imencode('.png', np.zeros((height, width, 3), np.uint8))
-        self.device.screencap.return_value = png.tobytes()
+        self.question = cv2.imread('./tests/question_4.jpg')
+        self.next_question = cv2.imread('./tests/question_1.jpg')
+
+        # The answer button of the first question with a green highlight
+        self.feedback = self.question.copy()
+        button = self.feedback[1335:1575, 50:1020]
+        self.feedback[1335:1575, 50:1020] = cv2.addWeighted(
+            button, 0.6, np.full_like(button, (110, 170, 110)), 0.4, 0)
+
+    def encode(self, img):
+        return cv2.imencode('.png', img)[1].tobytes()
+
+    def screen(self, width, height):
+        return self.encode(np.zeros((height, width, 3), np.uint8))
+
+    def play(self, *frames):
+        """Lets the device show the given frames, the first one before the tap."""
+        data = [self.encode(frame) for frame in frames]
+        self.device.screencap.side_effect = data + [data[-1]] * 1000
+        return mcp_server.get_screenshot()
 
     def test_screenshot_is_scaled(self):
-        self.screencap(1080, 2340)
+        self.device.screencap.return_value = self.screen(1080, 2340)
         text, image = mcp_server.get_screenshot()
 
-        self.assertEqual(max(mcp_server.last_screenshot[:2]),
-                         mcp_server.SCREENSHOT_MAX_SIZE)
-        self.assertEqual(text, 'Screenshot size: 473x1024')
+        self.assertIn('Screenshot size: 354x768', text)
         self.assertEqual(cv2.imdecode(np.frombuffer(image.data, np.uint8),
-                                      cv2.IMREAD_COLOR).shape[:2], (1024, 473))
+                                      cv2.IMREAD_COLOR).shape[:2], (768, 354))
 
     def test_small_screenshot_is_not_upscaled(self):
-        self.screencap(320, 480)
+        self.device.screencap.return_value = self.screen(320, 480)
         mcp_server.get_screenshot()
 
-        self.assertEqual(mcp_server.last_screenshot,
-                         mcp_server.Screenshot(320, 480, 1))
+        self.assertEqual(mcp_server.last_screenshot[1:], (320, 480, 1))
 
     def test_landscape_screenshot(self):
-        self.screencap(2340, 1080)
+        self.device.screencap.return_value = self.screen(2340, 1080)
         mcp_server.get_screenshot()
 
-        self.assertEqual(mcp_server.last_screenshot[:2], (1024, 473))
+        self.assertEqual(mcp_server.last_screenshot[1:3], (768, 354))
 
     def test_tap_is_scaled_to_device(self):
-        self.screencap(1080, 2340)
+        self.device.screencap.return_value = self.screen(1080, 2340)
         mcp_server.get_screenshot()
-        mcp_server.tap(236, 512)
+        mcp_server.tap(177, 384)
 
         self.device.input_tap.assert_called_once_with(539, 1170)
 
     def test_tap_on_small_screenshot_is_not_scaled(self):
-        self.screencap(320, 480)
+        self.device.screencap.return_value = self.screen(320, 480)
         mcp_server.get_screenshot()
         mcp_server.tap(100, 200)
 
@@ -484,14 +499,49 @@ class TestMcpServer(unittest.TestCase):
         self.device.input_tap.assert_not_called()
 
     def test_tap_outside_of_screenshot(self):
-        self.screencap(1080, 2340)
+        self.device.screencap.return_value = self.screen(1080, 2340)
         mcp_server.get_screenshot()
 
-        for x, y in [(-1, 10), (10, -1), (473, 10), (10, 1024)]:
+        for x, y in [(-1, 10), (10, -1), (354, 10), (10, 768)]:
             with self.assertRaises(mcp_server.ToolError):
                 mcp_server.tap(x, y)
 
         self.device.input_tap.assert_not_called()
+
+    def test_tap_returns_next_question(self):
+        self.play(self.question, self.feedback, self.feedback,
+                  self.next_question, self.next_question)
+        text, _ = mcp_server.tap(100, 300)
+
+        self.assertIn('New screen.', text)
+        self.assertEqual(self.device.screencap.call_count, 5)
+        self.assertTrue(mcp_server.has_new_content(
+            cv2.resize(self.question, (354, 768)), mcp_server.last_screenshot.image))
+
+    def test_tap_waits_for_transition_to_settle(self):
+        blend = cv2.addWeighted(self.feedback, 0.5, self.next_question, 0.5, 0)
+        self.play(self.question, blend, self.next_question, self.next_question)
+        mcp_server.tap(100, 300)
+
+        self.assertEqual(self.device.screencap.call_count, 4)
+
+    def test_tap_on_unchanged_screen(self):
+        self.play(self.question, self.feedback)
+        text, _ = mcp_server.tap(100, 300)
+
+        self.assertIn('Screen unchanged', text)
+
+    def test_highlight_is_no_new_content(self):
+        self.assertFalse(mcp_server.has_new_content(
+            self.question, self.feedback))
+
+    def test_new_question_is_new_content(self):
+        self.assertTrue(mcp_server.has_new_content(
+            self.feedback, self.next_question))
+
+    def test_rotation_is_new_content(self):
+        self.assertTrue(mcp_server.has_new_content(
+            self.question, cv2.rotate(self.question, cv2.ROTATE_90_CLOCKWISE)))
 
     def test_invalid_screenshot(self):
         for data in [b'', b'no image']:

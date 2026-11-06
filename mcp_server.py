@@ -2,16 +2,25 @@ import os
 import cv2
 import numpy as np
 from collections import namedtuple
+from time import monotonic
 from mcp.server import MCPServer
 from mcp.server.mcpserver import Image
 from mcp.server.mcpserver.exceptions import ToolError
 from ppadb.client import Client
 
 # Longest image side of a screenshot
-SCREENSHOT_MAX_SIZE = 1024
+SCREENSHOT_MAX_SIZE = 768
 
-# The size of a screenshot and its scale relative to the device resolution
-Screenshot = namedtuple('Screenshot', ['width', 'height', 'scale'])
+# A screen has new content if this share of its pixels changed by more than the
+# brightness threshold. Highlighted answers and animated backgrounds stay far below.
+CHANGE_BRIGHTNESS = 80
+CHANGE_AREA = 0.01
+
+# Seconds to wait for the next screen after a tap
+TAP_TIMEOUT = 10
+
+# A scaled image, its size and its scale relative to the device resolution
+Screenshot = namedtuple('Screenshot', ['image', 'width', 'height', 'scale'])
 
 mcp = MCPServer('schlaumeier')
 
@@ -46,8 +55,10 @@ def get_device():
     return devices[0]
 
 
-def scale_screenshot(data):
-    """Scales a raw screenshot down and returns it as JPEG, together with its size."""
+def take_screenshot(device):
+    """Takes a screenshot of the given device and scales it down."""
+    data = device.screencap()
+
     if (not data):
         raise ToolError('The device returned an empty screenshot.')
 
@@ -62,9 +73,46 @@ def scale_screenshot(data):
         img = cv2.resize(img, None, fx=scale, fy=scale,
                          interpolation=cv2.INTER_AREA)
 
-    _, jpg = cv2.imencode('.jpg', img, [cv2.IMWRITE_JPEG_QUALITY, 90])
+    return Screenshot(img, img.shape[1], img.shape[0], scale)
 
-    return jpg.tobytes(), Screenshot(img.shape[1], img.shape[0], scale)
+
+def has_new_content(before, after):
+    """Returns whether the content of two images differs, ignoring highlights."""
+    if (before.shape != after.shape):
+        return True
+
+    diff = cv2.absdiff(cv2.cvtColor(before, cv2.COLOR_BGR2GRAY),
+                       cv2.cvtColor(after, cv2.COLOR_BGR2GRAY))
+
+    return np.mean(diff > CHANGE_BRIGHTNESS) > CHANGE_AREA
+
+
+def wait_for_next_screen(device, before):
+    """Waits for new content to settle. Returns the screenshot and whether it changed."""
+    deadline = monotonic() + TAP_TIMEOUT
+    previous = before
+    changed = False
+
+    while (monotonic() < deadline):
+        current = take_screenshot(device)
+        moved = has_new_content(previous.image, current.image)
+
+        if (changed and not moved):
+            return current, True
+
+        changed = changed or moved
+        previous = current
+
+    return previous, changed
+
+
+def to_tool_result(text, screenshot):
+    """Returns the given text and screenshot as a result of a tool."""
+    _, jpg = cv2.imencode('.jpg', screenshot.image,
+                          [cv2.IMWRITE_JPEG_QUALITY, 90])
+
+    return ['{} Screenshot size: {}x{}'.format(text, screenshot.width, screenshot.height),
+            Image(data=jpg.tobytes(), format='jpeg')]
 
 
 def to_device_coordinates(x, y, screenshot):
@@ -84,19 +132,28 @@ def get_screenshot():
     """Takes a screenshot of the phone. Returns its size and the image."""
     global last_screenshot
 
-    jpg, last_screenshot = scale_screenshot(get_device().screencap())
+    last_screenshot = take_screenshot(get_device())
 
-    return ['Screenshot size: {}x{}'.format(last_screenshot.width, last_screenshot.height),
-            Image(data=jpg, format='jpeg')]
+    return to_tool_result('Current screen.', last_screenshot)
 
 
 @mcp.tool()
-def tap(x: int, y: int) -> str:
-    """Taps the phone at the given coordinates on the last screenshot."""
-    device_x, device_y = to_device_coordinates(x, y, last_screenshot)
-    get_device().input_tap(device_x, device_y)
+def tap(x: int, y: int):
+    """Taps the phone at the given coordinates on the last screenshot.
 
-    return 'Tapped ({}, {}) on the device.'.format(device_x, device_y)
+    Waits for the next screen and returns it like get_screenshot, so that no further
+    screenshot is required. Highlighting a tapped button doesn't count as a new screen.
+    """
+    global last_screenshot
+
+    device_x, device_y = to_device_coordinates(x, y, last_screenshot)
+    device = get_device()
+    device.input_tap(device_x, device_y)
+
+    last_screenshot, changed = wait_for_next_screen(device, last_screenshot)
+
+    return to_tool_result('New screen.' if changed else 'Screen unchanged after {}s.'.format(TAP_TIMEOUT),
+                          last_screenshot)
 
 
 if __name__ == '__main__':
