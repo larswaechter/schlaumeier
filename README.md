@@ -4,7 +4,7 @@
 
 _schlaumeier_ is a bot written in Python that allows you to automatically solve Android quiz games like [QuizDuel](https://play.google.com/store/apps/details?id=se.maginteractive.quizduel2&hl=en&gl=US), [Quiz Planet](https://play.google.com/store/apps/details?id=com.lotum.quizplanet&hl=en&gl=US) or [General Knowledge Quiz](https://play.google.com/store/apps/details?id=com.timleg.quiz&hl=en&gl=US) using [ADB](https://developer.android.com/studio/command-line/adb), [OpenCV](https://opencv.org/) and OpenAI's [ChatGPT API](https://openai.com/blog/gpt-3-apps). In my case, I have tested it for solving questions from the games mentioned above but other ones should work as well with some adjustments. In general, it should work for any quiz game that consists of a question and multiple solutions to choose from. At the end of this README, you'll find a list of supported games that were successfully tested.
 
-Simply put, the script operates by creating a screenshot, extracting the question / answers and passing them to ChatGPT, Claude or a local model. Alternatively, the screenshot can be passed directly to a vision model. The answer will be then entered on your device using the Android Debug Bridge (ADB). See below for more details on how it works.
+Simply put, the script operates by creating a screenshot, extracting the question / answers and passing them to ChatGPT, Claude or a local model. Alternatively, the screenshot can be passed directly to a vision model, or [Claude Code](#-claude-code-skill) can play by itself. The answer will be then entered on your device using the Android Debug Bridge (ADB). See below for more details on how it works.
 
 Note that since ChatGPT isn't perfect and has limited knowledge, the answers given **are not always correct** too. Moreover, the API response times and its request limit might play a role depending on the game. For predicting the answer to a question, OpenAI's `gpt-5.6-terra` model is used by default. You can use another one by changing `GPT_MODEL` in your `.env` file.
 
@@ -227,18 +227,41 @@ The answer is automatically entered by the script using a touch event. Afterward
 
 ## 🤖 Claude Code skill
 
-Instead of running the script, you can let [Claude Code](https://claude.com/product/claude-code) play: the `/schlaumeier` skill looks at your phone, chooses an answer and taps it. No slices, API key or Tesseract are required, but your Claude Code usage applies. Screenshots are sent to Anthropic.
+Instead of running the script, you can let [Claude Code](https://claude.com/product/claude-code) play: the `/schlaumeier` skill looks at your phone, chooses an answer and taps it. No slices, API key or Tesseract are required, but your Claude Code usage applies. Screenshots are sent to Anthropic. In a test with a real phone, it took about 4 seconds per question.
+
+The skill comes with this repository, so there's no separate installation. It's only available when Claude Code is started in this directory.
 
 It accesses your phone with the MCP server in [`mcp_server.py`](https://github.com/larswaechter/schlaumeier/blob/main/mcp_server.py), which only provides two tools: `get_screenshot` and `tap`. Claude can't run any other commands on your phone.
 
-Install [ADB](https://developer.android.com/studio/command-line/adb) and the dependencies into a virtual environment:
+### Installation
+
+Install [ADB](https://developer.android.com/studio/command-line/adb), for example with `brew install android-platform-tools` on macOS. Then clone this repository and install the dependencies into a virtual environment:
 
 ```bash
+git clone https://github.com/larswaechter/schlaumeier.git
+cd schlaumeier
 python3 -m venv .venv
 .venv/bin/pip install -r requirements.txt
 ```
 
-Connect your phone, run `adb start-server`, check that it's listed by `adb devices` and start `claude` in this directory. Approve the `schlaumeier` MCP server when asked and open a question in your game:
+Connect your phone, start ADB and check that your phone is listed:
+
+```bash
+adb start-server
+adb devices
+```
+
+Start Claude Code in this directory and approve the `schlaumeier` MCP server when asked:
+
+```bash
+claude
+```
+
+If you added the server to a session that's already running, reconnect it using `/mcp`.
+
+### Usage
+
+Open a question in your game and run one of the following commands:
 
 ```
 /schlaumeier
@@ -246,7 +269,11 @@ Connect your phone, run `adb start-server`, check that it's listed by `adb devic
 /schlaumeier all
 ```
 
-The first one solves the current question, the second one solves the next five and the third one keeps going without a limit. Press `Esc` to stop it at any time. Between rounds, the skill may tap buttons that are clearly free, like "Next" or "Continue". It stops at anything else, like ads, purchase dialogs, paid offers or screens it can't identify. Long runs use up your Claude Code usage quickly, so keep an eye on them. If multiple devices are connected, select one by setting `ADB_SERIAL` to its serial.
+The first one solves the current question, the second one solves the next five and the third one keeps going without a limit. Press `Esc` to stop it at any time. If multiple devices are connected, select one by setting `ADB_SERIAL` to its serial.
+
+Between rounds, the skill may tap buttons that are clearly free, like "Next" or "Continue". It stops at anything else, like ads, purchase dialogs, paid offers, popups or screens it can't identify, and leaves them to you. It also stops if the phone's screen is off, so keep it awake during a run.
+
+The skill judges its answers by the score shown in the game, as the highlighted result usually disappears before it sees the next screen. Long runs use up your Claude Code usage quickly, so keep an eye on them.
 
 ## 🎮 Support
 
